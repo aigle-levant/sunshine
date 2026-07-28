@@ -37,23 +37,17 @@ a {
 }
 
 :root {
-  --bg: #f4f0e8;
-  --surface: #ffffff;
-  --text: #17382b;
-  --accent: #d66b3d;
+  --bg: #EFF1F3;
+  --surface: #DBD3D8;
+  --text: #223843;
+  --accent: #D77A61;
+  --muted: #D8B4A0;
 }
 
 [data-theme="dark"] {
-  --bg: #10251d;
-  --surface: #18382b;
-  --text: #f4f0e8;
-  --accent: #f0be5d;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  transition:
-    background 300ms ease,
-    color 300ms ease;
+  --bg: #223843;
+  --surface: rgba(255, 255, 255, .06);
+  --text: #EFF1F3;
+  --accent: #D77A61;
+  --muted: #D8B4A0;
 }

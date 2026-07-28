@@ -8,8 +8,8 @@ function Footer() {
 
   return (
     <footer
-      className={`transition-colors duration-500 ${
-        isLight ? "bg-[#F7F3EC] text-[#22332D]" : "bg-[#1E2D28] text-[#F8F6F2]"
+      className={`transition-all duration-500 ${
+        isLight ? "bg-[#EFF1F3] text-[#223843]" : "bg-[#223843] text-[#EFF1F3]"
       }`}
     >
       <div className="mx-auto max-w-[1600px] px-6 py-20 md:px-12 lg:px-16 lg:py-28">
@@ -18,7 +18,7 @@ function Footer() {
           <div>
             <p
               className={`text-xs font-semibold uppercase tracking-[0.22em] ${
-                isLight ? "text-[#22332D]/50" : "text-white/45"
+                isLight ? "text-[#223843]/50" : "text-[#D8B4A0]"
               }`}
             >
               Built for women who build.
@@ -31,21 +31,9 @@ function Footer() {
             </h2>
           </div>
 
-          <button
-            className={`group flex w-fit items-center gap-5 rounded-full py-2 pl-7 pr-2 text-lg font-semibold transition-all duration-300 hover:scale-[1.02] ${
-              isLight
-                ? "bg-[#22332D] text-[#F8F6F2]"
-                : "bg-[#D8A15A] text-[#22332D]"
-            }`}
-          >
+          <button className="group flex w-fit items-center gap-5 rounded-full bg-[#D77A61] py-2 pl-7 pr-2 text-lg font-semibold text-[#EFF1F3] transition-all duration-300 hover:scale-[1.03] hover:bg-[#C96B53]">
             Speak to [TESTING]
-            <span
-              className={`flex h-14 w-14 items-center justify-center rounded-full transition-transform duration-300 group-hover:rotate-6 ${
-                isLight
-                  ? "bg-[#F8F6F2] text-[#22332D]"
-                  : "bg-[#22332D] text-[#F8F6F2]"
-              }`}
-            >
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#223843] text-[#EFF1F3] transition-transform duration-300 group-hover:rotate-6">
               <Mic size={20} />
             </span>
           </button>
@@ -54,7 +42,7 @@ function Footer() {
         {/* Divider */}
         <div
           className={`my-20 h-px ${
-            isLight ? "bg-[#22332D]/10" : "bg-white/10"
+            isLight ? "bg-[#223843]/10" : "bg-white/10"
           }`}
         />
 
@@ -64,12 +52,12 @@ function Footer() {
           <div>
             <h3 className="text-3xl font-semibold tracking-[-0.05em]">
               [TESTING]
-              <span className="text-[#D8A15A]">.</span>
+              <span className="text-[#D77A61]">.</span>
             </h3>
 
             <p
               className={`mt-6 max-w-md text-base leading-8 ${
-                isLight ? "text-[#22332D]/65" : "text-white/60"
+                isLight ? "text-[#223843]/65" : "text-[#EFF1F3]/70"
               }`}
             >
               A voice-first business companion helping women manage customers,
@@ -82,20 +70,27 @@ function Footer() {
           <div>
             <p
               className={`text-xs font-semibold uppercase tracking-[0.2em] ${
-                isLight ? "text-[#22332D]/45" : "text-white/40"
+                isLight ? "text-[#223843]/45" : "text-[#D8B4A0]"
               }`}
             >
               Navigate
             </p>
 
             <div className="mt-6 flex flex-col gap-4">
-              {["My Business", "Orders", "Customers", "Speak"].map((item) => (
+              {[
+                { label: "My Business", href: "#business" },
+                { label: "Orders", href: "#orders" },
+                { label: "Customers", href: "#customers" },
+                { label: "Speak", href: "#speak" },
+              ].map((item) => (
                 <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(" ", "")}`}
-                  className="transition-colors hover:text-[#D8A15A]"
+                  key={item.label}
+                  href={item.href}
+                  className={`transition-colors ${
+                    isLight ? "hover:text-[#D77A61]" : "hover:text-[#D77A61]"
+                  }`}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
             </div>
@@ -105,7 +100,7 @@ function Footer() {
           <div>
             <p
               className={`text-xs font-semibold uppercase tracking-[0.2em] ${
-                isLight ? "text-[#22332D]/45" : "text-white/40"
+                isLight ? "text-[#223843]/45" : "text-[#D8B4A0]"
               }`}
             >
               Designed for
@@ -113,7 +108,7 @@ function Footer() {
 
             <div
               className={`mt-6 flex flex-col gap-4 ${
-                isLight ? "text-[#22332D]/70" : "text-white/65"
+                isLight ? "text-[#223843]/70" : "text-[#EFF1F3]/70"
               }`}
             >
               <span>Tailors</span>
@@ -129,8 +124,8 @@ function Footer() {
         <div
           className={`mt-20 flex flex-col gap-5 border-t pt-8 text-sm md:flex-row md:items-center md:justify-between ${
             isLight
-              ? "border-[#22332D]/10 text-[#22332D]/55"
-              : "border-white/10 text-white/45"
+              ? "border-[#223843]/10 text-[#223843]/55"
+              : "border-white/10 text-[#EFF1F3]/55"
           }`}
         >
           <p>© 2026 [TESTING]. All rights reserved.</p>
@@ -141,7 +136,7 @@ function Footer() {
             href="https://github.com/"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 transition-colors hover:text-[#D8A15A]"
+            className="inline-flex items-center gap-2 transition-colors hover:text-[#D77A61]"
           >
             GitHub
             <ArrowUpRight size={14} />
