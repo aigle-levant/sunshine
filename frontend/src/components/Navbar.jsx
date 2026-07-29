@@ -1,58 +1,77 @@
-import { Menu, Mic } from "lucide-react";
+import { Menu, Mic, Moon, Sun } from "lucide-react";
+import useTheme from "../hooks/useTheme";
 
 function Navbar() {
+  const { theme, toggleTheme } = useTheme();
+
+  const isLight = theme === "light";
+
   return (
-    <header className="absolute inset-x-0 top-0 z-50">
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-5 md:px-10 md:py-7">
-        {/* Brand */}
+    <header className="absolute inset-x-0 top-0 z-50 px-6 pt-6">
+      <div className="mx-auto flex max-w-[1600px] items-center justify-between">
+        {/* Logo */}
         <a
           href="/"
-          className="text-xl font-semibold tracking-[-0.04em] text-[#18382B] md:text-2xl"
+          className={`text-3xl font-semibold tracking-[-0.05em] transition-colors ${
+            isLight ? "text-[#223843]" : "text-[#EFF1F3]"
+          }`}
         >
-          [TESTING]<span className="text-[#D66B3D]">.</span>
+          [TESTING]
+          <span className="text-[#D77A61]">.</span>
         </a>
 
-        {/* Desktop navigation */}
-        <nav className="hidden items-center gap-8 md:flex">
-          <a
-            href="#business"
-            className="text-sm font-medium text-[#18382B]/70 transition-colors hover:text-[#18382B]"
-          >
-            My Business
-          </a>
-
-          <a
-            href="#orders"
-            className="text-sm font-medium text-[#18382B]/70 transition-colors hover:text-[#18382B]"
-          >
-            Orders
-          </a>
-
-          <a
-            href="#customers"
-            className="text-sm font-medium text-[#18382B]/70 transition-colors hover:text-[#18382B]"
-          >
-            Customers
-          </a>
+        {/* Navigation */}
+        <nav
+          className={`hidden items-center rounded-full border p-2 shadow-xl backdrop-blur-xl lg:flex ${
+            isLight
+              ? "border-[#223843]/10 bg-[#EFF1F3]/90"
+              : "border-white/10 bg-[#223843]/85"
+          }`}
+        >
+          {["My Business", "Orders", "Customers"].map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase().replace(" ", "")}`}
+              className={`rounded-full px-8 py-3 text-[15px] font-medium transition-all ${
+                isLight
+                  ? "text-[#223843] hover:bg-white"
+                  : "text-[#EFF1F3] hover:bg-white/10"
+              }`}
+            >
+              {item}
+            </a>
+          ))}
         </nav>
 
-        {/* Primary action */}
-        <div className="flex items-center gap-3">
+        {/* Actions */}
+        <div className="flex items-center gap-4">
+          {/* Theme */}
           <button
-            type="button"
-            className="hidden items-center gap-2 rounded-full bg-[#18382B] px-5 py-3 text-sm font-medium text-[#F5F0E7] transition-transform hover:scale-[1.02] active:scale-[0.98] sm:flex"
+            onClick={toggleTheme}
+            className={`hidden h-14 w-14 items-center justify-center rounded-full shadow-lg backdrop-blur transition-all sm:flex ${
+              isLight
+                ? "bg-[#EFF1F3]/90 text-[#223843]"
+                : "bg-[#223843]/90 text-[#EFF1F3]"
+            }`}
           >
-            <Mic size={16} strokeWidth={1.8} />
+            {isLight ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
+          {/* CTA */}
+          <button className="hidden items-center gap-3 rounded-full bg-[#D77A61] px-7 py-4 text-sm font-medium text-[#EFF1F3] shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-[#C96B53] sm:flex">
+            <Mic size={16} />
             Speak to [TESTING]
           </button>
 
-          {/* Mobile menu - visual only for now */}
+          {/* Mobile */}
           <button
-            type="button"
-            aria-label="Open menu"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-[#18382B]/15 text-[#18382B] md:hidden"
+            className={`flex h-14 w-14 items-center justify-center rounded-full shadow-lg backdrop-blur lg:hidden ${
+              isLight
+                ? "bg-[#EFF1F3]/90 text-[#223843]"
+                : "bg-[#223843]/90 text-[#EFF1F3]"
+            }`}
           >
-            <Menu size={20} strokeWidth={1.8} />
+            <Menu size={22} />
           </button>
         </div>
       </div>
