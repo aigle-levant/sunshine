@@ -10,12 +10,12 @@
 
 import {
   BarChart3,
-  Camera,
   CalendarDays,
   LayoutDashboard,
   Lightbulb,
   Megaphone,
   Package,
+  Sparkles,
   Users,
   Wallet,
 } from "lucide-react";
@@ -56,10 +56,10 @@ export const NAV_ITEMS = [
     icon: Megaphone,
   },
   {
-    id: "instagram",
-    label: "Instagram",
-    to: `${DASHBOARD_ROOT}/instagram`,
-    icon: Camera,
+    id: "marketing-strategy",
+    label: "Strategy",
+    to: `${DASHBOARD_ROOT}/marketing-strategy`,
+    icon: Sparkles,
   },
   {
     id: "reports",

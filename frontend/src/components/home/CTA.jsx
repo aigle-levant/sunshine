@@ -1,17 +1,15 @@
 import { ArrowRight, Mic } from "lucide-react";
 import useTheme from "../../hooks/useTheme";
-
+import { useNavigate } from "react-router-dom";
 function CTA() {
   const { theme } = useTheme();
 
   const isLight = theme === "light";
-
+  const navigate = useNavigate();
   return (
     <section
       className={`transition-colors duration-500 ${
-        isLight
-          ? "bg-[#EFF1F3] text-[#223843]"
-          : "bg-[#223843] text-[#EFF1F3]"
+        isLight ? "bg-[#EFF1F3] text-[#223843]" : "bg-[#223843] text-[#EFF1F3]"
       }`}
     >
       <div className="mx-auto max-w-[1600px] px-6 py-32 md:px-12 lg:px-16">
@@ -34,8 +32,7 @@ function CTA() {
                 Your business
                 <br />
                 already has
-                <br />
-                a voice.
+                <br />a voice.
               </h2>
 
               <p
@@ -51,7 +48,10 @@ function CTA() {
             {/* Right */}
 
             <div className="flex flex-col justify-end gap-6">
-              <button className="group flex items-center justify-between rounded-full bg-[#D77A61] px-8 py-5 text-lg font-medium text-[#EFF1F3] transition hover:bg-[#C96B53]">
+              <button
+                onClick={() => navigate("/speak")}
+                className="group flex items-center justify-between rounded-full bg-[#D77A61] px-8 py-5 text-lg font-medium text-[#EFF1F3] transition hover:bg-[#C96B53]"
+              >
                 <span className="flex items-center gap-4">
                   <Mic size={20} />
                   Speak to VoiceKart AI

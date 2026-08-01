@@ -40,8 +40,7 @@ import {
  * Each glyph branches to a literal element rather than resolving a component
  * from data — clearer to read, and it keeps component identity static.
  *
- * lucide-react ships no Instagram glyph, so Instagram borrows the Camera icon
- * the dashboard sidebar already uses for its Instagram section.
+ * lucide-react ships no Instagram glyph at all, so Instagram borrows Camera.
  */
 function PlatformGlyph({ platform }) {
   const shared = { size: 14, strokeWidth: 1.9, className: "shrink-0 text-[#D77A61]" };

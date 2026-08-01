@@ -8,9 +8,14 @@
 // Generation still goes through the existing POST /api/planner/generate and the
 // existing Instagram brand analysis; nothing about that pipeline changed, only
 // how its answer is presented.
+//
+// Marketing Strategy can hand a freshly generated strategy over through router
+// state, in which case that strategy and its brand context are what the week is
+// generated from.
 
 import { useCallback, useState } from "react";
-import { AlertCircle, Plus } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { AlertCircle, Plus, Sparkles } from "lucide-react";
 
 import useTheme from "../../hooks/useTheme";
 import GenerateWeekButton from "../../components/dashboard/GenerateWeekButton";
@@ -29,10 +34,12 @@ import {
   generateWeeklyPlan,
   getLatestBrandContext,
   saveWeeklyPlan,
+  scheduleCampaign,
 } from "../../services/planner";
 
 function WeeklyPlanner() {
   const { theme } = useTheme();
+  const location = useLocation();
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [editingId, setEditingId] = useState(null);
@@ -42,6 +49,10 @@ function WeeklyPlanner() {
   const { rows, saveRow, deleteRow, addRow, replaceAll } = useWeeklyPlan(weekStart);
 
   const isLight = theme === "light";
+
+  // Handed over by Marketing Strategy on navigation, absent on a direct visit.
+  const incomingStrategy = location.state?.strategy ?? null;
+  const incomingBrandContext = location.state?.brandContext ?? null;
 
   const isThisWeek = toKey(weekStart) === toKey(startOfWeek(new Date()));
 
@@ -55,10 +66,25 @@ function WeeklyPlanner() {
 
   const handleSaveRow = useCallback(
     (row) => {
+      const previous = rows.find((existing) => existing.id === row.id);
+
       saveRow(row);
       setEditingId(null);
+
+      // Marking a row Scheduled is what the old card grid's "Schedule" button
+      // did: one campaign row, written once, on the transition only.
+      if (row.status === "Scheduled" && previous?.status !== "Scheduled") {
+        scheduleCampaign(demoUser.id, {
+          title: row.title,
+          platform: row.platform,
+          caption: row.caption,
+          whatsappMessage: row.platform === "WhatsApp" ? row.caption : null,
+          bestTime: row.scheduledTime,
+          imagePrompt: row.mediaUrl || null,
+        }).catch(() => {});
+      }
     },
-    [saveRow],
+    [rows, saveRow],
   );
 
   const handleDeleteRow = useCallback(
@@ -85,9 +111,14 @@ function WeeklyPlanner() {
 
       // The saved Instagram analysis is what gives the week its brand voice, but
       // it's optional — a missing or unreachable one shouldn't block generation.
-      const brandContext = await getLatestBrandContext(demoUser.id).catch(() => null);
+      const brandContext =
+        incomingBrandContext ??
+        (await getLatestBrandContext(demoUser.id).catch(() => null));
 
-      const week = await generateWeeklyPlan(businessSummary, brandContext);
+      const week = await generateWeeklyPlan(
+        businessSummary,
+        incomingStrategy ? { ...brandContext, strategy: incomingStrategy } : brandContext,
+      );
 
       replaceAll(rowsFromGeneratedWeek(week, weekStart));
 
@@ -99,7 +130,7 @@ function WeeklyPlanner() {
     } finally {
       setIsGenerating(false);
     }
-  }, [replaceAll, weekStart]);
+  }, [incomingBrandContext, incomingStrategy, replaceAll, weekStart]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -150,6 +181,20 @@ function WeeklyPlanner() {
           </p>
         )}
       </div>
+
+      {incomingStrategy && (
+        <div
+          className={`flex items-center gap-3 rounded-2xl border px-5 py-4 text-[13.5px] leading-6 ${
+            isLight
+              ? "border-[#D77A61]/30 bg-[#D77A61]/5"
+              : "border-[#D77A61]/30 bg-[#D77A61]/10"
+          }`}
+        >
+          <Sparkles size={16} strokeWidth={2} className="shrink-0 text-[#D77A61]" />
+          Using the marketing strategy you just generated —{" "}
+          {incomingStrategy.weeklyTheme || incomingStrategy.marketingObjective}.
+        </div>
+      )}
 
       {error && (
         <div className="flex gap-3 rounded-2xl border border-[#D77A61]/30 bg-[#D77A61]/10 px-5 py-4 text-[#C96B53] dark:text-[#E29883]">

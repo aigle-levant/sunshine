@@ -101,6 +101,9 @@ function Marketing() {
         limit={20}
         title="All suggestions"
         delay={0.1}
+        // Keeps the platform-onboarding empty state this panel gained: with no
+        // orders yet there are no campaigns to suggest, so it offers setup.
+        onboardingWhenEmpty
       />
 
       <VoiceAssistantBar delay={0.15} />

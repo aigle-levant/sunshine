@@ -56,7 +56,7 @@ function InstagramConnect() {
       setSuccessMessage("Instagram analysis saved successfully!");
 
       setTimeout(() => {
-        navigate("/dashboard/marketing");
+        navigate("/dashboard/marketing-strategy", { state: { profile, brandContext } });
       }, 1500);
     } catch (err) {
       setError(err.message || "Failed to save analysis");

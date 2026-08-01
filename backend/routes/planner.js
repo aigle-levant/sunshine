@@ -96,6 +96,137 @@ router.post("/generate", async (req, res) => {
   }
 });
 
+router.post("/recommend-platform", async (req, res) => {
+  try {
+    const { businessSummary } = req.body;
+
+    const prompt = `Based on the business summary below, recommend the most effective marketing platform.
+
+Business Summary
+${businessSummary || "No business summary available."}
+
+Return ONLY JSON.
+
+Schema
+{
+  "recommendedPlatform": "Instagram",
+  "reason": "Your customers engage more with visual product showcases."
+}`;
+
+    const response = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 300,
+      temperature: 0.3,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    let content = response.content[0].text.trim();
+    content = content
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```$/, "")
+      .trim();
+
+    const json = JSON.parse(content);
+
+    res.json({
+      success: true,
+      recommendedPlatform: json.recommendedPlatform,
+      reason: json.reason,
+    });
+  } catch (err) {
+    console.error("Planner recommend-platform error:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message || "Failed to recommend a platform",
+    });
+  }
+});
+
+router.post("/generate-strategy", async (req, res) => {
+  try {
+    const {
+      businessSummary,
+      brandContext,
+      platformAnalysis,
+      ownerContext,
+      campaignPreferences,
+      postingFrequency,
+      contentGoal,
+    } = req.body;
+
+    const prompt = `You are an expert marketing strategist.
+
+Using the following information
+
+Business Summary
+${businessSummary || "No business summary available."}
+
+Brand Context
+${brandContext || "No brand context available."}
+
+Instagram Analysis
+${platformAnalysis || "No platform analysis available."}
+
+Owner Context
+${ownerContext || "None provided — use your best judgement."}
+
+Campaign Preferences
+${Array.isArray(campaignPreferences) && campaignPreferences.length ? campaignPreferences.join(", ") : "AI Recommended"}
+
+Posting Frequency
+${postingFrequency || "Not specified"}
+
+Content Goal
+${contentGoal || "Not specified"}
+
+Create a marketing strategy.
+
+Return ONLY JSON.
+
+Schema
+{
+  "brandSummary": "",
+  "marketingObjective": "",
+  "recommendedPlatforms": ["Instagram", "WhatsApp"],
+  "contentMix": [
+    { "type": "Educational", "percentage": 30 }
+  ],
+  "postingSchedule": "",
+  "weeklyTheme": "",
+  "keyMessages": [],
+  "ctaStyle": "",
+  "recommendedHashtags": [],
+  "imageStyle": "",
+  "nextStep": "Generate Weekly Planner"
+}`;
+
+    const response = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 1200,
+      temperature: 0.5,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    let content = response.content[0].text.trim();
+    content = content
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```$/, "")
+      .trim();
+
+    const json = JSON.parse(content);
+
+    res.json({ success: true, strategy: json });
+  } catch (err) {
+    console.error("Planner generate-strategy error:", err);
+    res.status(500).json({
+      success: false,
+      error: err.message || "Failed to generate marketing strategy",
+    });
+  }
+});
+
 router.post("/regenerate-day", async (req, res) => {
   try {
     const { businessSummary, brandContext, day } = req.body;

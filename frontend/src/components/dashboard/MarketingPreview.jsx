@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { Megaphone } from "lucide-react";
 
 import EmptyState from "./EmptyState";
+import MarketingOnboarding from "./marketing/MarketingOnboarding";
 import Panel from "./Panel";
 import SuggestedCampaign from "./SuggestedCampaign";
 import { DASHBOARD_ROOT } from "./navItems";
@@ -85,6 +86,7 @@ function MarketingPreview({
   limit = 2,
   title = "Suggested outreach",
   delay = 0,
+  onboardingWhenEmpty = false,
 }) {
   const campaigns = useMemo(
     () => buildCampaigns({ orders, customers }),
@@ -120,6 +122,8 @@ function MarketingPreview({
             />
           ))}
         </ul>
+      ) : onboardingWhenEmpty ? (
+        <MarketingOnboarding />
       ) : (
         <EmptyState
           icon={Megaphone}
