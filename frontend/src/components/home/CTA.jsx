@@ -1,5 +1,5 @@
 import { ArrowRight, Mic } from "lucide-react";
-import useTheme from "../hooks/useTheme";
+import useTheme from "../../hooks/useTheme";
 
 function CTA() {
   const { theme } = useTheme();
@@ -54,7 +54,7 @@ function CTA() {
               <button className="group flex items-center justify-between rounded-full bg-[#D77A61] px-8 py-5 text-lg font-medium text-[#EFF1F3] transition hover:bg-[#C96B53]">
                 <span className="flex items-center gap-4">
                   <Mic size={20} />
-                  Speak to [TESTING]
+                  Speak to VoiceKart AI
                 </span>
 
                 <ArrowRight

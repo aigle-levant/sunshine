@@ -1,5 +1,37 @@
 @import "tailwindcss";
 
+/*
+  Theme is driven by data-theme on <html> (set pre-paint in index.html, kept in
+  sync by ThemeProvider). Registering it as Tailwind's `dark` variant means new
+  code can write `dark:bg-…` instead of hand-branching on the theme value.
+*/
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --bg: #eff1f3;
+  --surface: #dbd3d8;
+  --text: #223843;
+  --accent: #d77a61;
+  --accent-strong: #c96b53;
+  --muted: #d8b4a0;
+  --border: rgb(34 56 67 / 0.12);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #223843;
+  --surface: rgb(255 255 255 / 0.06);
+  --text: #eff1f3;
+  --accent: #d77a61;
+  --accent-strong: #c96b53;
+  --muted: #d8b4a0;
+  --border: rgb(255 255 255 / 0.14);
+
+  /* Tells the browser to darken scrollbars, form controls and caret. */
+  color-scheme: dark;
+}
+
 html,
 body,
 #root {
@@ -12,12 +44,20 @@ body,
 
 html {
   scroll-behavior: smooth;
+
+  /* Also paints the overscroll area, so rubber-banding never flashes white. */
+  background-color: var(--bg);
 }
 
 body {
   min-width: 320px;
   min-height: 100vh;
   overflow-x: hidden;
+  background-color: var(--bg);
+  color: var(--text);
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease;
 }
 
 #root {
@@ -36,18 +76,49 @@ a {
   text-decoration: none;
 }
 
-:root {
-  --bg: #EFF1F3;
-  --surface: #DBD3D8;
-  --text: #223843;
-  --accent: #D77A61;
-  --muted: #D8B4A0;
+::selection {
+  background-color: var(--accent);
+  color: #eff1f3;
 }
 
-[data-theme="dark"] {
-  --bg: #223843;
-  --surface: rgba(255, 255, 255, .06);
-  --text: #EFF1F3;
-  --accent: #D77A61;
-  --muted: #D8B4A0;
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Scrollbars: Firefox */
+html {
+  scrollbar-color: color-mix(in srgb, var(--text) 28%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
+/* Scrollbars: WebKit / Blink */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--text) 24%, transparent);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--text) 42%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    transition: none;
+  }
 }

@@ -1,4 +1,4 @@
-import useTheme from "../hooks/useTheme";
+import useTheme from "../../hooks/useTheme";
 
 function ProblemStatement() {
   const { theme } = useTheme();
@@ -17,7 +17,7 @@ function ProblemStatement() {
           {/* Left */}
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#D77A61]">
-              Why [TESTING]
+              Why VoiceKart AI
             </p>
 
             <h2 className="mt-5 text-[clamp(2.6rem,5vw,5.2rem)] font-medium leading-[0.94] tracking-[-0.05em]">
@@ -56,8 +56,8 @@ function ProblemStatement() {
           {/* Right */}
           <div className="relative overflow-hidden rounded-[2rem]">
             <img
-              src="https://images.unsplash.com/photo-1722903700281-a1f903357c88?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              alt="Woman entrepreneur from rural Tamil Nadu"
+              src="../../../public/hero.jpg"
+              alt="Traditional handloom weaving in Tamil Nadu"
               className="h-[620px] w-full object-cover transition-transform duration-700 hover:scale-105"
             />
 

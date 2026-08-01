@@ -1,5 +1,5 @@
 import { Mic, ArrowRight } from "lucide-react";
-import useTheme from "../hooks/useTheme";
+import useTheme from "../../hooks/useTheme";
 
 function Solution() {
   const { theme } = useTheme();
@@ -40,7 +40,7 @@ function Solution() {
               </p>
 
               <p>
-                [TESTING] understands orders, payments, customers and reminders
+                VoiceKart AI understands orders, payments, customers and reminders
                 from everyday conversations—then quietly keeps everything
                 organised in the background.
               </p>
@@ -84,7 +84,7 @@ function Solution() {
 
               <div>
                 <p className="text-sm font-semibold text-[#D77A61]">
-                  [TESTING] understands
+                  VoiceKart AI understands
                 </p>
 
                 <div

@@ -1,24 +1,34 @@
 import { Menu, Mic, Moon, Sun } from "lucide-react";
-import useTheme from "../hooks/useTheme";
+import useTheme from "../../hooks/useTheme";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+
+// Hash anchors pointed at sections that were never built; these are the real
+// dashboard routes. "Social media" is the outreach section — the sidebar calls
+// the same route "Marketing".
+const NAV_LINKS = [
+  { label: "Dashboard", to: "/dashboard" },
+  { label: "Customers", to: "/dashboard/customers" },
+  { label: "Social Media", to: "/dashboard/marketing" },
+];
 
 function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   const isLight = theme === "light";
-
+  const navigate = useNavigate();
   return (
     <header className="absolute inset-x-0 top-0 z-50 px-6 pt-6">
       <div className="mx-auto flex max-w-[1600px] items-center justify-between">
         {/* Logo */}
-        <a
-          href="/"
+        <Link
+          to="/"
           className={`text-3xl font-semibold tracking-[-0.05em] transition-colors ${
             isLight ? "text-[#223843]" : "text-[#EFF1F3]"
           }`}
         >
-          [TESTING]
+          VoiceKart AI
           <span className="text-[#D77A61]">.</span>
-        </a>
+        </Link>
 
         {/* Navigation */}
         <nav
@@ -28,18 +38,23 @@ function Navbar() {
               : "border-white/10 bg-[#223843]/85"
           }`}
         >
-          {["My Business", "Orders", "Customers"].map((item) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase().replace(" ", "")}`}
-              className={`rounded-full px-8 py-3 text-[15px] font-medium transition-all ${
-                isLight
-                  ? "text-[#223843] hover:bg-white"
-                  : "text-[#EFF1F3] hover:bg-white/10"
-              }`}
+          {NAV_LINKS.map(({ label, to }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === "/dashboard"}
+              className={({ isActive }) =>
+                `rounded-full px-8 py-3 text-[15px] font-medium transition-all ${
+                  isActive
+                    ? "text-[#D77A61]"
+                    : isLight
+                      ? "text-[#223843] hover:bg-white"
+                      : "text-[#EFF1F3] hover:bg-white/10"
+                }`
+              }
             >
-              {item}
-            </a>
+              {label}
+            </NavLink>
           ))}
         </nav>
 
@@ -58,10 +73,14 @@ function Navbar() {
           </button>
 
           {/* CTA */}
-          <button className="hidden items-center gap-3 rounded-full bg-[#D77A61] px-7 py-4 text-sm font-medium text-[#EFF1F3] shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-[#C96B53] sm:flex">
+          <button
+            onClick={() => navigate("/speak")}
+            className="hidden items-center gap-3 rounded-full bg-[#D77A61] px-7 py-4 text-sm font-medium text-[#EFF1F3] shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-[#C96B53] sm:flex"
+          >
             <Mic size={16} />
-            Speak to [TESTING]
+            Speak to VoiceKart AI
           </button>
+        </div>
 
           {/* Mobile */}
           <button
@@ -74,7 +93,6 @@ function Navbar() {
             <Menu size={22} />
           </button>
         </div>
-      </div>
     </header>
   );
 }

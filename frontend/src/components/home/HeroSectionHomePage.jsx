@@ -1,6 +1,6 @@
 import { ArrowDown, Mic } from "lucide-react";
-import useTheme from "../hooks/useTheme";
-
+import useTheme from "../../hooks/useTheme";
+import { useNavigate } from "react-router-dom";
 const LIGHT_HERO =
   "https://images.unsplash.com/photo-1622182474659-f13d68140bfc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
@@ -11,7 +11,7 @@ function Hero() {
   const { theme } = useTheme();
 
   const isLight = theme === "light";
-
+const navigate = useNavigate();
   return (
     <section className="relative h-screen min-h-[700px] overflow-hidden bg-black text-white">
       {/* Background */}
@@ -102,13 +102,11 @@ function Hero() {
               </p>
 
               <button
-                type="button"
-                className="group mt-8 flex items-center gap-5 rounded-full bg-[#D77A61] py-2 pl-7 pr-2 text-lg font-semibold text-[#EFF1F3] transition-all duration-300 hover:scale-[1.02] hover:bg-[#C96B53]"
+                onClick={() => navigate("/speak")}
+                className="hidden items-center gap-3 rounded-full bg-[#D77A61] px-7 py-4 text-sm font-medium text-[#EFF1F3] shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-[#C96B53] sm:flex"
               >
-                Speak to [TESTING]
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#223843] text-[#EFF1F3]">
-                  <Mic size={21} strokeWidth={1.8} />
-                </span>
+                <Mic size={16} />
+                Speak to VoiceKart AI
               </button>
             </div>
           </div>
