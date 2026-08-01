@@ -1,15 +1,18 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Home from "./pages/Homepage";
+import Home from "./pages/Home";
+import Speak from "./pages/Speak";
+// import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
-    <div className="min-h-screen bg-[#F4F0E8]">
-
-
-      <main>
-        <Home />
-      </main>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/speak" element={<Speak />} />
+        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+      </Routes>
+    </BrowserRouter>
   );
 }
 
