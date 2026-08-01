@@ -111,7 +111,10 @@ app.get("/api/health", (req, res) => {
 // Parse Only (Preview)
 // ---------------------------------------------------------------------------
 app.post("/api/process", (req, res) => {
-    const { text } = req.body;
+    console.log("BODY:", req.body);
+
+    // Accept either field
+    const text = req.body.text || req.body.transcript;
 
     if (!text || typeof text !== "string") {
         return res.status(400).json({
@@ -130,7 +133,9 @@ app.post("/api/process", (req, res) => {
 // Create Entry
 // ---------------------------------------------------------------------------
 app.post("/api/entries", (req, res) => {
-    const { text, lang } = req.body;
+    // Accept either field
+    const text = req.body.text || req.body.transcript;
+    const { lang } = req.body;
 
     if (!text || typeof text !== "string") {
         return res.status(400).json({
