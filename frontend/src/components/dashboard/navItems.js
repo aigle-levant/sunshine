@@ -10,6 +10,7 @@
 
 import {
   BarChart3,
+  Camera,
   CalendarDays,
   LayoutDashboard,
   Lightbulb,
@@ -53,6 +54,12 @@ export const NAV_ITEMS = [
     label: "Marketing",
     to: `${DASHBOARD_ROOT}/marketing`,
     icon: Megaphone,
+  },
+  {
+    id: "instagram",
+    label: "Instagram",
+    to: `${DASHBOARD_ROOT}/instagram`,
+    icon: Camera,
   },
   {
     id: "reports",

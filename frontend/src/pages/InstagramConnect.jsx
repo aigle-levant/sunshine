@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Loader, AlertCircle } from "lucide-react";
+import { Loader, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { analyzeInstagram, saveInstagramAnalysis } from "../services/instagram.js";
 import demoUser from "../constants/demoUser.js";
@@ -71,7 +71,6 @@ function InstagramConnect() {
     }
   };
 
-  const bgColor = isLight ? "bg-[#EFF1F3]" : "bg-[#1a1a1a]";
   const textColor = isLight ? "text-[#223843]" : "text-[#EFF1F3]";
   const cardBg = isLight ? "bg-white border-[#223843]/10" : "bg-[#252525] border-white/10";
   const inputBg = isLight ? "bg-[#F5F5F5] border-[#223843]/15" : "bg-[#333] border-white/15";
@@ -79,27 +78,12 @@ function InstagramConnect() {
   const accentText = "text-[#D77A61]";
 
   return (
-    <div className={`min-h-screen ${bgColor} ${textColor} transition-colors duration-300`}>
-      <div className="mx-auto max-w-2xl px-4 py-8">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className={`mb-6 flex items-center gap-2 text-sm font-medium transition-colors duration-300 ${
-            isLight
-              ? "text-[#223843]/70 hover:text-[#223843]"
-              : "text-[#EFF1F3]/70 hover:text-[#EFF1F3]"
-          }`}
-        >
-          <ArrowLeft size={16} />
-          Back
-        </button>
+    <div className={`max-w-2xl ${textColor}`}>
+      <p className={`mb-8 text-sm ${isLight ? "text-[#223843]/60" : "text-[#EFF1F3]/60"}`}>
+        Connect your Instagram account to analyze your brand and get strategic insights
+      </p>
 
-        <h1 className="mb-2 text-3xl font-bold">Instagram Analysis</h1>
-        <p className={`mb-8 text-sm ${isLight ? "text-[#223843]/60" : "text-[#EFF1F3]/60"}`}>
-          Connect your Instagram account to analyze your brand and get strategic insights
-        </p>
-
-        {/* Input Section */}
+      {/* Input Section */}
         <div className={`mb-6 rounded-2xl border p-6 ${cardBg}`}>
           <label className="mb-3 block text-sm font-semibold">Instagram Username</label>
           <div className="flex gap-3">
@@ -286,7 +270,6 @@ function InstagramConnect() {
             </p>
           </div>
         )}
-      </div>
     </div>
   );
 }

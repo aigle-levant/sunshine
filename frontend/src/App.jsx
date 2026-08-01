@@ -25,8 +25,6 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/speak" element={<Speak />} />
 
-        <Route path="/instagram-connect" element={<InstagramConnect />} />
-
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<Overview />} />
           <Route path="orders" element={<Orders />} />
@@ -34,6 +32,7 @@ function App() {
           <Route path="payments" element={<Payments />} />
           <Route path="insights" element={<Insights />} />
           <Route path="marketing" element={<Marketing />} />
+          <Route path="instagram" element={<InstagramConnect />} />
           <Route path="reports" element={<Reports />} />
           <Route path="weekly-planner" element={<WeeklyPlanner />} />
         </Route>
