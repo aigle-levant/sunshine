@@ -71,6 +71,66 @@ export async function generateWeeklyPlan(businessSummary, brandContext) {
   return payload.week;
 }
 
+export async function recommendPlatform(businessSummary) {
+  let response;
+
+  try {
+    response = await fetch(`${API_URL}/api/planner/recommend-platform`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessSummary }),
+    });
+  } catch {
+    throw new Error("Couldn't reach VoiceKart AI. Check that the backend is running.");
+  }
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload.error || "Failed to get a platform recommendation");
+  }
+
+  return { recommendedPlatform: payload.recommendedPlatform, reason: payload.reason };
+}
+
+export async function generateMarketingStrategy({
+  businessSummary,
+  brandContext,
+  platformAnalysis,
+  ownerContext,
+  campaignPreferences,
+  postingFrequency,
+  contentGoal,
+}) {
+  let response;
+
+  try {
+    response = await fetch(`${API_URL}/api/planner/generate-strategy`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessSummary,
+        brandContext: brandContext ? JSON.stringify(brandContext) : "",
+        platformAnalysis: platformAnalysis ? JSON.stringify(platformAnalysis) : "",
+        ownerContext,
+        campaignPreferences,
+        postingFrequency,
+        contentGoal,
+      }),
+    });
+  } catch {
+    throw new Error("Couldn't reach VoiceKart AI. Check that the backend is running.");
+  }
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload.error || "Failed to generate marketing strategy");
+  }
+
+  return payload.strategy;
+}
+
 export async function regenerateDay(businessSummary, brandContext, dayName) {
   let response;
 

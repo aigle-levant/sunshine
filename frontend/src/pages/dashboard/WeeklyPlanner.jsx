@@ -6,7 +6,8 @@
 // `campaigns`.
 
 import { useState } from "react";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
 
 import useTheme from "../../hooks/useTheme";
 import DayCard from "../../components/dashboard/DayCard";
@@ -24,6 +25,10 @@ import {
 function WeeklyPlanner() {
   const { theme } = useTheme();
   const isLight = theme === "light";
+  const location = useLocation();
+
+  const incomingStrategy = location.state?.strategy ?? null;
+  const incomingBrandContext = location.state?.brandContext ?? null;
 
   const [week, setWeek] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -38,9 +43,13 @@ function WeeklyPlanner() {
 
     try {
       const businessSummary = buildBusinessSummary();
-      const brandContext = await getLatestBrandContext(demoUser.id);
+      const brandContext =
+        incomingBrandContext ?? (await getLatestBrandContext(demoUser.id));
 
-      const generatedWeek = await generateWeeklyPlan(businessSummary, brandContext);
+      const generatedWeek = await generateWeeklyPlan(
+        businessSummary,
+        incomingStrategy ? { ...brandContext, strategy: incomingStrategy } : brandContext,
+      );
       setWeek(generatedWeek);
 
       await saveWeeklyPlan(demoUser.id, generatedWeek).catch(() => {});
@@ -68,7 +77,7 @@ function WeeklyPlanner() {
 
     try {
       const businessSummary = buildBusinessSummary();
-      const brandContext = await getLatestBrandContext(demoUser.id);
+      const brandContext = incomingBrandContext ?? (await getLatestBrandContext(demoUser.id));
 
       const newDay = await regenerateDay(businessSummary, brandContext, day.day);
 
@@ -91,9 +100,20 @@ function WeeklyPlanner() {
         </p>
       </div>
 
+      {incomingStrategy && (
+        <div
+          className={`mb-6 flex items-center gap-3 rounded-lg border p-4 text-sm ${
+            isLight ? "border-[#D77A61]/30 bg-[#D77A61]/5" : "border-[#D77A61]/30 bg-[#D77A61]/10"
+          }`}
+        >
+          <Sparkles size={16} className="shrink-0 text-[#D77A61]" />
+          Using the marketing strategy you just generated — {incomingStrategy.weeklyTheme || incomingStrategy.marketingObjective}.
+        </div>
+      )}
+
       {error && (
         <div className="mb-6 flex gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-[#D77A61]">
-          <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
+          <AlertCircle size={18} className="mt-0.5 shrink-0" />
           <p className="text-sm">{error}</p>
         </div>
       )}

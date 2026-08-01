@@ -15,6 +15,7 @@ import Customers from "./pages/dashboard/Customers";
 import Payments from "./pages/dashboard/Payments";
 import Insights from "./pages/dashboard/Insights";
 import Marketing from "./pages/dashboard/Marketing";
+import MarketingStrategy from "./pages/dashboard/MarketingStrategy";
 import Reports from "./pages/dashboard/Reports";
 import WeeklyPlanner from "./pages/dashboard/WeeklyPlanner";
 
@@ -32,6 +33,7 @@ function App() {
           <Route path="payments" element={<Payments />} />
           <Route path="insights" element={<Insights />} />
           <Route path="marketing" element={<Marketing />} />
+          <Route path="marketing-strategy" element={<MarketingStrategy />} />
           <Route path="instagram" element={<InstagramConnect />} />
           <Route path="reports" element={<Reports />} />
           <Route path="weekly-planner" element={<WeeklyPlanner />} />

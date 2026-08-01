@@ -15,6 +15,7 @@ function Marketing() {
       customers={data.customers}
       limit={20}
       title="All suggestions"
+      onboardingWhenEmpty
     />
   );
 }
