@@ -32,7 +32,7 @@ function Footer() {
           </div>
 
           <button className="group flex w-fit items-center gap-5 rounded-full bg-[#D77A61] py-2 pl-7 pr-2 text-lg font-semibold text-[#EFF1F3] transition-all duration-300 hover:scale-[1.03] hover:bg-[#C96B53]">
-            Speak to [TESTING]
+            Speak to VoiceKart AI
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#223843] text-[#EFF1F3] transition-transform duration-300 group-hover:rotate-6">
               <Mic size={20} />
             </span>
@@ -51,7 +51,7 @@ function Footer() {
           {/* Brand */}
           <div>
             <h3 className="text-3xl font-semibold tracking-[-0.05em]">
-              [TESTING]
+              VoiceKart AI
               <span className="text-[#D77A61]">.</span>
             </h3>
 
@@ -128,7 +128,7 @@ function Footer() {
               : "border-white/10 text-[#EFF1F3]/55"
           }`}
         >
-          <p>© 2026 [TESTING]. All rights reserved.</p>
+          <p>© 2026 VoiceKart AI. All rights reserved.</p>
 
           <p>Made with purpose in Chennai.</p>
 

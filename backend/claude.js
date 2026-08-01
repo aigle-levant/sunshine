@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
-import buildPrompt from "../prompts/buildPrompt.js";
+import buildPrompt from "./prompt.js";
 
 dotenv.config();
 

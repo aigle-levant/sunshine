@@ -16,7 +16,7 @@ function Navbar() {
             isLight ? "text-[#223843]" : "text-[#EFF1F3]"
           }`}
         >
-          [TESTING]
+          VoiceKart AI
           <span className="text-[#D77A61]">.</span>
         </a>
 
@@ -60,7 +60,7 @@ function Navbar() {
           {/* CTA */}
           <button className="hidden items-center gap-3 rounded-full bg-[#D77A61] px-7 py-4 text-sm font-medium text-[#EFF1F3] shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-[#C96B53] sm:flex">
             <Mic size={16} />
-            Speak to [TESTING]
+            Speak to VoiceKart AI
           </button>
 
           {/* Mobile */}

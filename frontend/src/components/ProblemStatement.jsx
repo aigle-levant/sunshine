@@ -17,7 +17,7 @@ function ProblemStatement() {
           {/* Left */}
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#D77A61]">
-              Why [TESTING]
+              Why VoiceKart AI
             </p>
 
             <h2 className="mt-5 text-[clamp(2.6rem,5vw,5.2rem)] font-medium leading-[0.94] tracking-[-0.05em]">

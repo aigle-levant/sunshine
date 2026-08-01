@@ -105,7 +105,7 @@ function Hero() {
                 type="button"
                 className="group mt-8 flex items-center gap-5 rounded-full bg-[#D77A61] py-2 pl-7 pr-2 text-lg font-semibold text-[#EFF1F3] transition-all duration-300 hover:scale-[1.02] hover:bg-[#C96B53]"
               >
-                Speak to [TESTING]
+                Speak to VoiceKart AI
                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#223843] text-[#EFF1F3]">
                   <Mic size={21} strokeWidth={1.8} />
                 </span>
