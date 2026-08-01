@@ -2,18 +2,18 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
 
-/**
- * Sends a transcript to the backend, which passes it to Claude and returns
- * structured business data: { summary, customers, orders, payments, tasks, insights }
- */
 export async function analyzeTranscript(transcript) {
   let response;
 
   try {
     response = await fetch(`${API_BASE_URL}/api/process`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transcript }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        transcript,
+      }),
     });
   } catch {
     throw new Error(
@@ -21,13 +21,13 @@ export async function analyzeTranscript(transcript) {
     );
   }
 
-  const payload = await response.json().catch(() => null);
+  const payload = await response.json();
 
-  if (!response.ok || !payload?.success) {
-    throw new Error(
-      payload?.error ?? "Couldn't understand that recording. Please try again.",
-    );
+  console.log("Claude returned:", payload);
+
+  if (!response.ok) {
+    throw new Error(payload.error || "Backend error");
   }
 
-  return payload.data;
+  return payload;
 }

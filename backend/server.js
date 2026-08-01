@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import crypto from "crypto";
+import { anthropic } from "./claude.js";
 
 dotenv.config();
 
@@ -110,23 +111,98 @@ app.get("/api/health", (req, res) => {
 // ---------------------------------------------------------------------------
 // Parse Only (Preview)
 // ---------------------------------------------------------------------------
-app.post("/api/process", (req, res) => {
-    console.log("BODY:", req.body);
 
-    // Accept either field
-    const text = req.body.text || req.body.transcript;
+app.post("/api/process", async (req, res) => {
+    try {
+        const text = req.body.text || req.body.transcript;
 
-    if (!text || typeof text !== "string") {
-        return res.status(400).json({
+        if (!text) {
+            return res.status(400).json({
+                success: false,
+                error: "text is required",
+            });
+        }
+
+        const prompt = `
+You are an AI business assistant.
+
+Extract the user's speech.
+
+The speech may be in English, Tamil, Hindi, Telugu or mixed languages.
+
+Understand it regardless of language.
+
+Extract the business information.
+
+Return ONLY JSON.
+
+Schema:
+
+{
+  "summary": "",
+  "customers": [
+    {
+      "name": ""
+    }
+  ],
+  "orders": [
+    {
+      "customer": "",
+      "item": "",
+      "quantity": 1,
+      "delivery_date": "",
+      "status": ""
+    }
+  ],
+  "payments": [
+    {
+      "customer": "",
+      "amount": null,
+      "status": ""
+    }
+  ],
+  "tasks": [],
+  "insights": []
+}
+
+Speech:
+
+${text}
+`;
+
+        const response = await anthropic.messages.create({
+            model: "claude-haiku-4-5",
+            max_tokens: 600,
+            temperature: 0,
+            messages: [
+                {
+                    role: "user",
+                    content: prompt,
+                },
+            ],
+        });
+        
+        let content = response.content[0].text.trim();
+        console.log(content);
+        // Remove markdown code fences if Claude added them
+        content = content
+            .replace(/^```json\s*/i, "")
+            .replace(/^```\s*/i, "")
+            .replace(/```$/, "")
+            .trim();
+
+        const json = JSON.parse(content);
+        console.log(json);
+        res.json(json);
+
+    } catch (err) {
+        console.error(err);
+
+        res.status(500).json({
             success: false,
-            error: "text is required",
+            error: err.message,
         });
     }
-
-    res.json({
-        success: true,
-        data: parseEntry(text),
-    });
 });
 
 // ---------------------------------------------------------------------------

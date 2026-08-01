@@ -1,29 +1,19 @@
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
-import buildPrompt from "./prompt.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config();
-
-const anthropic = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
+// Must run before the client is constructed: this module is evaluated
+// during server.js's import phase, i.e. before its own dotenv.config().
+// Resolved against this file, not cwd, so it works from any directory.
+dotenv.config({
+    path: path.join(path.dirname(fileURLToPath(import.meta.url)), ".env"),
 });
 
-export async function processTranscript(transcript) {
-    const prompt = buildPrompt(transcript);
-
-    const response = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1200,
-        temperature: 0,
-        messages: [
-            {
-                role: "user",
-                content: prompt,
-            },
-        ],
-    });
-
-    const text = response.content[0].text;
-
-    return JSON.parse(text);
+if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("ANTHROPIC_API_KEY is missing from backend/.env");
 }
+
+export const anthropic = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+});
