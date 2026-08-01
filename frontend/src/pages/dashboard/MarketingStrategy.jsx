@@ -115,6 +115,25 @@ function MarketingStrategy() {
     navigate("/dashboard/weekly-planner", { state: { strategy, brandContext, profile } });
   };
 
+  const handleCreateContent = () => {
+    const prompt = [
+      strategy?.weeklyTheme,
+      strategy?.marketingObjective,
+      Array.isArray(strategy?.keyMessages) ? strategy.keyMessages.join(". ") : null,
+    ]
+      .filter(Boolean)
+      .join(" — ");
+
+    navigate("/dashboard/content-studio", {
+      state: {
+        seed: {
+          prompt,
+          targetAudience: targetAudience || brandContext?.audience || "",
+        },
+      },
+    });
+  };
+
   return (
     <div className={textColor}>
       <div className="mb-8">
@@ -132,7 +151,11 @@ function MarketingStrategy() {
       )}
 
       {strategy ? (
-        <GeneratedStrategyCard strategy={strategy} onContinue={handleContinue} />
+        <GeneratedStrategyCard
+          strategy={strategy}
+          onContinue={handleContinue}
+          onCreateContent={handleCreateContent}
+        />
       ) : (
         <div className="flex flex-col gap-6">
           <PlatformSummaryCard

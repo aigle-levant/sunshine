@@ -8,7 +8,7 @@
 // gets a proper Tamil face instead of the browser's fallback.
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy, Download, RefreshCw, Save } from "lucide-react";
+import { Calendar, Check, Copy, Download, RefreshCw, Save } from "lucide-react";
 
 import useTheme from "../../../hooks/useTheme";
 import { scriptFontStyle } from "../../voice/language";
@@ -61,6 +61,8 @@ function GeneratedContentCard({
   onSave,
   isSaving,
   isSaved,
+  onAddToPlanner,
+  isAddedToPlanner,
   isGenerating,
   delay = 0,
 }) {
@@ -202,6 +204,20 @@ function GeneratedContentCard({
           <button type="button" onClick={handleDownload} className={ghost}>
             <Download size={14} strokeWidth={2} />
             Download TXT
+          </button>
+
+          <button
+            type="button"
+            onClick={onAddToPlanner}
+            disabled={isAddedToPlanner}
+            className={ghost}
+          >
+            {isAddedToPlanner ? (
+              <Check size={14} strokeWidth={2.4} />
+            ) : (
+              <Calendar size={14} strokeWidth={2} />
+            )}
+            {isAddedToPlanner ? "Added to Planner" : "Add to Planner"}
           </button>
         </div>
 

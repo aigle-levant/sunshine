@@ -8,6 +8,7 @@
 
 import { AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 import useTheme from "../../hooks/useTheme";
 import LoadingSkeleton from "../../components/dashboard/LoadingSkeleton";
@@ -58,6 +59,12 @@ function ResultPlaceholder({ isLight }) {
 
 function ContentStudio() {
   const { theme } = useTheme();
+  const location = useLocation();
+
+  // Marketing Strategy can hand over a seed prompt/audience through router
+  // state (see MarketingStrategy.jsx's "Create content in Studio"); absent on
+  // a direct visit.
+  const seed = location.state?.seed;
 
   const {
     form,
@@ -73,10 +80,12 @@ function ContentStudio() {
     save,
     isSaving,
     savedId,
+    addToPlanner,
+    addedToPlannerId,
     history,
     removeFromHistory,
     openFromHistory,
-  } = useContentStudio();
+  } = useContentStudio(seed);
 
   const isLight = theme === "light";
 
@@ -118,6 +127,8 @@ function ContentStudio() {
               onSave={save}
               isSaving={isSaving}
               isSaved={savedId === result.id}
+              onAddToPlanner={addToPlanner}
+              isAddedToPlanner={addedToPlannerId === result.id}
               isGenerating={isGenerating}
               delay={0.05}
             />

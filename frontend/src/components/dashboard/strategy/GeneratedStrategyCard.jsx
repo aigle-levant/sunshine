@@ -3,7 +3,7 @@
 // The result of a successful /api/planner/generate-strategy call, plus the
 // CTA that hands the strategy off to the Weekly Planner.
 
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 
 import useTheme from "../../../hooks/useTheme";
 
@@ -18,7 +18,7 @@ function Block({ label, children, isLight }) {
   );
 }
 
-function GeneratedStrategyCard({ strategy, onContinue }) {
+function GeneratedStrategyCard({ strategy, onContinue, onCreateContent }) {
   const { theme } = useTheme();
   const isLight = theme === "light";
 
@@ -80,14 +80,29 @@ function GeneratedStrategyCard({ strategy, onContinue }) {
         </Block>
       </div>
 
-      <button
-        type="button"
-        onClick={onContinue}
-        className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#D77A61] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#C96B53] sm:w-auto"
-      >
-        Continue to Weekly Planner
-        <ArrowRight size={16} />
-      </button>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={onContinue}
+          className="flex items-center justify-center gap-2 rounded-lg bg-[#D77A61] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#C96B53]"
+        >
+          Continue to Weekly Planner
+          <ArrowRight size={16} />
+        </button>
+
+        <button
+          type="button"
+          onClick={onCreateContent}
+          className={`flex items-center justify-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold transition-colors duration-300 ${
+            isLight
+              ? "border-[#223843]/15 text-[#223843] hover:bg-[#223843]/5"
+              : "border-white/15 text-[#EFF1F3] hover:bg-white/5"
+          }`}
+        >
+          <Sparkles size={16} />
+          Create content in Studio
+        </button>
+      </div>
     </div>
   );
 }

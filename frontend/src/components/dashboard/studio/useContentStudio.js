@@ -14,11 +14,25 @@ import {
   getHistory,
   saveDraft,
 } from "../../../services/contentStudio";
+import { getPlannerWeek, savePlannerWeek } from "../../../lib/storage";
+import {
+  DAYS,
+  dateForDay,
+  normaliseRow,
+  sortRows,
+  startOfWeek,
+  toKey,
+} from "../../planner/plannerModel";
 import { inspectImage } from "./imageInsights";
 import { DEFAULTS, IMAGE_TYPES, MAX_IMAGE_BYTES } from "./studioOptions";
 
-export default function useContentStudio() {
-  const [form, setForm] = useState(DEFAULTS);
+/** The planner only knows Instagram and WhatsApp; everything else defaults to Instagram. */
+function platformForContentType(contentType) {
+  return /whats\s*app/i.test(String(contentType ?? "")) ? "WhatsApp" : "Instagram";
+}
+
+export default function useContentStudio(seed) {
+  const [form, setForm] = useState(() => ({ ...DEFAULTS, ...seed }));
   const [image, setImage] = useState(null);
   const [imageError, setImageError] = useState("");
 
@@ -29,6 +43,7 @@ export default function useContentStudio() {
   const [history, setHistory] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [savedId, setSavedId] = useState(null);
+  const [addedToPlannerId, setAddedToPlannerId] = useState(null);
 
   // Object URLs outlive the state that referenced them unless revoked, and the
   // ref means the cleanup below doesn't need `image` as a dependency.
@@ -118,6 +133,7 @@ export default function useContentStudio() {
     inFlightRef.current = true;
     setError("");
     setSavedId(null);
+    setAddedToPlannerId(null);
     setIsGenerating(true);
 
     try {
@@ -149,6 +165,44 @@ export default function useContentStudio() {
     }
   }, [image, isSaving, result]);
 
+  /** Drops the current result into today's slot on the current week of the Weekly Planner. */
+  const addToPlanner = useCallback(() => {
+    if (!result) return null;
+
+    const weekStart = startOfWeek(new Date());
+    const weekKey = toKey(weekStart);
+    const day = DAYS[(new Date().getDay() + 6) % 7];
+    const platform = platformForContentType(result.contentType);
+
+    const caption = [
+      result.caption,
+      result.hashtags?.length ? result.hashtags.map((tag) => `#${tag}`).join(" ") : null,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
+    const row = normaliseRow(
+      {
+        day,
+        date: dateForDay(weekStart, day),
+        platform,
+        contentType: result.contentType,
+        title: result.title,
+        caption,
+        // Not image.previewUrl: that's an object URL revoked once the studio's
+        // image changes or unmounts, so it wouldn't survive into the planner.
+        mediaType: image ? "image" : "none",
+        mediaUrl: "",
+      },
+      weekStart,
+    );
+
+    savePlannerWeek(weekKey, sortRows([...(getPlannerWeek(weekKey) ?? []), row]));
+    setAddedToPlannerId(result.id);
+
+    return row;
+  }, [image, result]);
+
   const removeFromHistory = useCallback(async (id) => {
     // Removed straight away, then confirmed — the list shouldn't wait on a
     // round trip to react to a delete.
@@ -161,6 +215,7 @@ export default function useContentStudio() {
   const openFromHistory = useCallback((entry) => {
     setError("");
     setSavedId(entry.id);
+    setAddedToPlannerId(null);
     setResult({
       id: entry.id,
       title: entry.title,
@@ -189,6 +244,8 @@ export default function useContentStudio() {
     save,
     isSaving,
     savedId,
+    addToPlanner,
+    addedToPlannerId,
     history,
     removeFromHistory,
     openFromHistory,
