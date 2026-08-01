@@ -3,7 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#EFF1F3" />
     <title>VoiceKart AI</title>
+
+    <!--
+      Resolve the theme before first paint, otherwise the page renders light and
+      then snaps to dark. Kept in sync with ThemeProvider, which reads the same
+      key and falls back to the same OS preference.
+    -->
+    <script>
+      (function () {
+        var theme = "light";
+
+        try {
+          var stored = localStorage.getItem("theme");
+
+          if (stored === "light" || stored === "dark") {
+            theme = stored;
+          } else if (
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+          ) {
+            theme = "dark";
+          }
+        } catch (error) {
+          // Storage blocked — light is a safe default.
+        }
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

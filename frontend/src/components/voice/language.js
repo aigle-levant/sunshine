@@ -99,11 +99,31 @@ export function scriptFontStyle(text) {
 }
 
 /**
- * Listening-stage copy in the language being spoken. Results stay in English
- * labels — only the capture experience follows the speaker.
+ * Tamil sits above and below the baseline far more than Latin does, so the
+ * hero's tight display metrics clip it. Each language gets its own scale.
+ */
+export const HEADLINE_CLASS = {
+  [TAMIL]: "text-[clamp(2.1rem,4.8vw,4.4rem)] leading-[1.3]",
+  [ENGLISH]:
+    "text-[clamp(3rem,6.5vw,7rem)] leading-[0.9] tracking-[-0.055em]",
+};
+
+/**
+ * Capture-stage copy in the language being spoken. Results stay in English
+ * labels — only the input experience follows the speaker.
  */
 export const COPY = {
   [TAMIL]: {
+    home: {
+      eyebrow: "இயல்பாக பேசுங்கள்",
+      headline: ["இன்று நான்", "எப்படி", "உதவட்டும்?"],
+      subtitle: "உங்கள் வணிகத்தை இயல்பாக விவரியுங்கள் — தமிழிலோ ஆங்கிலத்திலோ.",
+      start: "பேசத் தொடங்குங்கள்",
+      languageLabel: "மொழி",
+    },
+    noSpeech: "எதுவும் கேட்கவில்லை. மீண்டும் பேசி முயற்சிக்கவும்.",
+    unsupported:
+      "இந்த உலாவியில் பேச்சு அங்கீகாரம் இல்லை. Chrome அல்லது Edge பயன்படுத்துங்கள் — அல்லது கீழே தட்டச்சு செய்யுங்கள்.",
     headline: "எதையும் பேசுங்கள்",
     subtitle: "நான் கேட்டுக்கொண்டிருக்கிறேன்…",
     placeholder: "பேசத் தொடங்குங்கள், உங்கள் வார்த்தைகள் இங்கே தோன்றும்…",
@@ -115,6 +135,16 @@ export const COPY = {
     send: "அனுப்பு",
   },
   [ENGLISH]: {
+    home: {
+      eyebrow: "Speak naturally",
+      headline: ["How can I", "help you", "today?"],
+      subtitle: "Describe your business naturally — in Tamil or English.",
+      start: "Start Speaking",
+      languageLabel: "Language",
+    },
+    noSpeech: "I didn't catch anything. Try speaking again.",
+    unsupported:
+      "This browser can't listen yet. Please use Chrome or Edge to speak — or type your update below instead.",
     headline: "Speak anything",
     subtitle: "I'm listening…",
     placeholder: "Start speaking to see your words appear here…",

@@ -7,22 +7,26 @@ import { motion } from "framer-motion";
 import { Languages } from "lucide-react";
 
 import useTheme from "../../hooks/useTheme";
-import { LANGUAGES } from "./language";
+import { LANGUAGES, copyFor, scriptFontStyle } from "./language";
 
 function LanguageToggle({ value, onChange, disabled = false }) {
   const { theme } = useTheme();
 
   const isLight = theme === "light";
 
+  const label = copyFor(value).home.languageLabel;
+
   return (
-    <div className="flex flex-wrap items-center gap-4">
+    <div className="flex flex-wrap items-center justify-center gap-4">
       <span
+        lang={value}
+        style={scriptFontStyle(label)}
         className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] ${
           isLight ? "text-[#223843]/50" : "text-[#EFF1F3]/50"
         }`}
       >
         <Languages size={15} strokeWidth={1.8} />
-        Language
+        {label}
       </span>
 
       <div

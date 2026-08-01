@@ -24,6 +24,8 @@ import LanguageToggle from "./voice/LanguageToggle";
 import TextInputPanel from "./voice/TextInputPanel";
 import { saveEntry, toExtraction } from "./voice/extraction";
 import {
+  ENGLISH,
+  HEADLINE_CLASS,
   copyFor,
   loadLanguage,
   saveLanguage,
@@ -99,13 +101,13 @@ function SpeakHero({ disabled = false }) {
 
       if (!text) {
         setStage("home");
-        setHint("I didn't catch anything. Try speaking again.");
+        setHint(copy.noSpeech);
         return;
       }
 
       runAnalysis(text);
     },
-    [runAnalysis],
+    [copy, runAnalysis],
   );
 
   const {
@@ -189,7 +191,11 @@ function SpeakHero({ disabled = false }) {
 
   const notice = isSupported
     ? (hint ?? (stage === "home" ? speechError : null))
-    : "This browser can't listen yet. Please use Chrome or Edge to speak — or type your update below instead.";
+    : copy.unsupported;
+
+  const home = copy.home;
+
+  const isEnglish = language === ENGLISH;
 
   return (
     <>
@@ -199,24 +205,45 @@ function SpeakHero({ disabled = false }) {
         }`}
       >
         <div className="mx-auto flex max-w-[900px] flex-col items-center px-6 pt-32 pb-24 text-center md:px-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#D77A61]">
-            Speak naturally
+          <p
+            lang={language}
+            style={scriptFontStyle(home.eyebrow)}
+            className="text-xs font-semibold uppercase tracking-[0.25em] text-[#D77A61]"
+          >
+            {home.eyebrow}
           </p>
 
-          <h1 className="mt-6 text-[clamp(3rem,6.5vw,7rem)] font-medium leading-[0.9] tracking-[-0.055em]">
-            How can I
-            <br />
-            help you
-            <br />
-            <span className="font-normal italic">today?</span>
+          <h1
+            lang={language}
+            style={scriptFontStyle(home.headline.join(" "))}
+            className={`mt-6 font-medium ${HEADLINE_CLASS[language]}`}
+          >
+            {home.headline.map((line, index) => {
+              const isLast = index === home.headline.length - 1;
+
+              return (
+                <span key={line}>
+                  {/* Latin faces have a true italic; Tamil would only get a
+                      synthesised slant, so it stays upright. */}
+                  <span
+                    className={isLast && isEnglish ? "font-normal italic" : ""}
+                  >
+                    {line}
+                  </span>
+                  {!isLast && <br />}
+                </span>
+              );
+            })}
           </h1>
 
           <p
-            className={`mt-8 max-w-md text-lg leading-9 ${
+            lang={language}
+            style={scriptFontStyle(home.subtitle)}
+            className={`mt-8 max-w-lg text-lg leading-9 ${
               isLight ? "text-[#223843]/70" : "text-[#EFF1F3]/70"
             }`}
           >
-            Describe your business naturally — in Tamil or English.
+            {home.subtitle}
           </p>
 
           {/* No browser detects the spoken language on its own, so let the
@@ -241,7 +268,10 @@ function SpeakHero({ disabled = false }) {
                 : `${idleClasses} hover:scale-[1.02]`
             }`}
           >
-            Start Speaking
+            <span lang={language} style={scriptFontStyle(home.start)}>
+              {home.start}
+            </span>
+
             <span
               className={`flex h-14 w-14 items-center justify-center rounded-full transition-colors duration-300 ${
                 isBlocked
@@ -291,6 +321,7 @@ function SpeakHero({ disabled = false }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35 }}
+                style={scriptFontStyle(notice)}
                 className={`mt-10 max-w-xl rounded-3xl border px-7 py-5 text-base leading-8 ${
                   isLight
                     ? "border-[#D77A61]/30 bg-[#D8B4A0]/25 text-[#223843]"
