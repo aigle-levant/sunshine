@@ -10,6 +10,7 @@
 
 import {
   BarChart3,
+  CalendarDays,
   LayoutDashboard,
   Lightbulb,
   Megaphone,
@@ -58,6 +59,12 @@ export const NAV_ITEMS = [
     label: "Reports",
     to: `${DASHBOARD_ROOT}/reports`,
     icon: BarChart3,
+  },
+  {
+    id: "weekly-planner",
+    label: "Weekly Planner",
+    to: `${DASHBOARD_ROOT}/weekly-planner`,
+    icon: CalendarDays,
   },
 ];
 

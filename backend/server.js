@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import { anthropic } from "./claude.js";
+import instagramRoutes from "./routes/instagram.js";
+import plannerRoutes from "./routes/planner.js";
 
 dotenv.config();
 
@@ -90,6 +92,9 @@ function computeSummary() {
     };
 }
 
+
+app.use("/api/instagram", instagramRoutes);
+app.use("/api/planner", plannerRoutes);
 // ---------------------------------------------------------------------------
 // Health Check
 // ---------------------------------------------------------------------------

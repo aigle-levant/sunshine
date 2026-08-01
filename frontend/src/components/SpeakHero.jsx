@@ -16,6 +16,8 @@ import { Mic } from "lucide-react";
 import useTheme from "../hooks/useTheme";
 import useSpeechTranscript from "../hooks/useSpeechTranscript";
 import { analyzeTranscript } from "../services/api";
+import { saveAnalysis } from "../services/auth";
+import demoUser from "../constants/demoUser";
 
 import VoiceRecordingScreen from "./voice/VoiceRecordingScreen";
 import ProcessingScreen from "./voice/ProcessingScreen";
@@ -170,15 +172,27 @@ function SpeakHero({ disabled = false }) {
   }, []);
 
   const handleSave = useCallback(
-    (values) => {
-      saveEntry({
+    async (values) => {
+      const entry = {
         transcript: finalTranscript,
         language,
         source,
         values,
         data: rawDataRef.current,
         savedAt: new Date().toISOString(),
-      });
+      };
+
+      // Save to localStorage
+      saveEntry(entry);
+
+      // Save to Supabase (falls back to localStorage if it fails)
+      try {
+        if (rawDataRef.current) {
+          await saveAnalysis(demoUser.id, rawDataRef.current);
+        }
+      } catch (error) {
+        console.warn("Could not save analysis:", error);
+      }
     },
     [finalTranscript, language, source],
   );

@@ -1,0 +1,134 @@
+import { supabase } from "../lib/supabase.js";
+import { readEntries, buildDashboard, formatCurrency } from "../components/dashboard/dashboardData.js";
+import {
+  getInstagramContext,
+  saveWeeklyPlan as saveWeeklyPlanLocal,
+  saveCampaign,
+} from "../lib/storage.js";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+/** Builds a plain-text business summary from locally recorded voice entries. */
+export function buildBusinessSummary() {
+  const data = buildDashboard(readEntries());
+
+  if (data.isEmpty) {
+    return "A small business with no recorded orders or customers yet.";
+  }
+
+  const lines = [
+    `${data.entryCount} recorded updates, ${data.stats.orders} orders and ${data.stats.customers} customers so far.`,
+    `Revenue collected: ${formatCurrency(data.stats.revenue)}. Outstanding balance: ${formatCurrency(data.stats.outstanding)}.`,
+  ];
+
+  if (data.insights.length) {
+    lines.push(`Business insights: ${data.insights.slice(0, 5).map((i) => i.text).join("; ")}.`);
+  }
+
+  return lines.join(" ");
+}
+
+/** Fetches the most recently saved Instagram brand analysis for this user. */
+export async function getLatestBrandContext(userId) {
+  const { data, error } = await supabase
+    .from("social_accounts")
+    .select("brand_context")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) {
+    const local = getInstagramContext();
+    return local.length ? local[local.length - 1].brand_context ?? null : null;
+  }
+
+  return data?.brand_context ?? null;
+}
+
+export async function generateWeeklyPlan(businessSummary, brandContext) {
+  let response;
+
+  try {
+    response = await fetch(`${API_URL}/api/planner/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessSummary,
+        brandContext: brandContext ? JSON.stringify(brandContext) : "",
+      }),
+    });
+  } catch {
+    throw new Error("Couldn't reach VoiceKart AI. Check that the backend is running.");
+  }
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload.error || "Failed to generate weekly plan");
+  }
+
+  return payload.week;
+}
+
+export async function regenerateDay(businessSummary, brandContext, dayName) {
+  let response;
+
+  try {
+    response = await fetch(`${API_URL}/api/planner/regenerate-day`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessSummary,
+        brandContext: brandContext ? JSON.stringify(brandContext) : "",
+        day: dayName,
+      }),
+    });
+  } catch {
+    throw new Error("Couldn't reach VoiceKart AI. Check that the backend is running.");
+  }
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload.error || "Failed to regenerate day");
+  }
+
+  return payload.day;
+}
+
+export async function saveWeeklyPlan(userId, week) {
+  const { error } = await supabase.from("weekly_plans").insert([
+    {
+      user_id: userId,
+      week,
+    },
+  ]);
+
+  if (error) {
+    saveWeeklyPlanLocal(week);
+    return;
+  }
+}
+
+export async function scheduleCampaign(userId, day) {
+  const campaign = {
+    user_id: userId,
+    title: day.title,
+    platform: day.platform,
+    caption: day.caption,
+    whatsapp_message: day.whatsappMessage,
+    hashtags: day.hashtags,
+    best_time: day.bestTime,
+    image_prompt: day.imagePrompt,
+    status: "scheduled",
+    scheduled_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase.from("campaigns").insert([campaign]);
+
+  if (error) {
+    saveCampaign(campaign);
+    return;
+  }
+}

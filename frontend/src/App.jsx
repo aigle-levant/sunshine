@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Speak from "./pages/Speak";
 import NotFound from "./pages/NotFound";
+import InstagramConnect from "./pages/InstagramConnect";
 
 // /dashboard is a layout route: Dashboard loads the shared data once and the
 // section below it renders into its <Outlet>. Adding a section means one entry
@@ -15,6 +16,7 @@ import Payments from "./pages/dashboard/Payments";
 import Insights from "./pages/dashboard/Insights";
 import Marketing from "./pages/dashboard/Marketing";
 import Reports from "./pages/dashboard/Reports";
+import WeeklyPlanner from "./pages/dashboard/WeeklyPlanner";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/speak" element={<Speak />} />
+
+        <Route path="/instagram-connect" element={<InstagramConnect />} />
 
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<Overview />} />
@@ -31,6 +35,7 @@ function App() {
           <Route path="insights" element={<Insights />} />
           <Route path="marketing" element={<Marketing />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="weekly-planner" element={<WeeklyPlanner />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
