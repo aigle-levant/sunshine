@@ -1,9 +1,9 @@
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import Hero from "../components/HeroSectionHomePage";
-import ProblemStatement from "../components/ProblemStatement";
-import Solution from "../components/Solution";
-import CTA from "../components/CTA";
+import Navbar from "../components/common/Navbar";
+import Footer from "../components/common/Footer";
+import Hero from "../components/home/HeroSectionHomePage";
+import ProblemStatement from "../components/home/ProblemStatement";
+import Solution from "../components/home/Solution";
+import CTA from "../components/home/CTA";
 
 function Home() {
   return (

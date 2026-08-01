@@ -1,5 +1,5 @@
 import { ArrowDown, Mic } from "lucide-react";
-import useTheme from "../hooks/useTheme";
+import useTheme from "../../hooks/useTheme";
 
 const LIGHT_HERO =
   "https://images.unsplash.com/photo-1622182474659-f13d68140bfc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";

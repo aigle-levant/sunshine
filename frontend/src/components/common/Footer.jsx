@@ -1,5 +1,5 @@
 import { ArrowUpRight, Mic } from "lucide-react";
-import useTheme from "../hooks/useTheme";
+import useTheme from "../../hooks/useTheme";
 
 function Footer() {
   const { theme } = useTheme();

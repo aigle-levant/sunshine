@@ -1,5 +1,5 @@
 import { Menu, Mic, Moon, Sun } from "lucide-react";
-import useTheme from "../hooks/useTheme";
+import useTheme from "../../hooks/useTheme";
 
 function Navbar() {
   const { theme, toggleTheme } = useTheme();

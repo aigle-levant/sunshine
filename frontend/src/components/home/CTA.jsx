@@ -1,5 +1,5 @@
 import { ArrowRight, Mic } from "lucide-react";
-import useTheme from "../hooks/useTheme";
+import useTheme from "../../hooks/useTheme";
 
 function CTA() {
   const { theme } = useTheme();

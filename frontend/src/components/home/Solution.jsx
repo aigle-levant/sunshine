@@ -1,5 +1,5 @@
 import { Mic, ArrowRight } from "lucide-react";
-import useTheme from "../hooks/useTheme";
+import useTheme from "../../hooks/useTheme";
 
 function Solution() {
   const { theme } = useTheme();
