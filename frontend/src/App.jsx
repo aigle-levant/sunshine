@@ -9,6 +9,7 @@ import InstagramConnect from "./pages/InstagramConnect";
 // section below it renders into its <Outlet>. Adding a section means one entry
 // in components/dashboard/navItems.js and one <Route> here.
 import Dashboard from "./pages/Dashboard";
+import ContentStudio from "./pages/dashboard/ContentStudio";
 import Overview from "./pages/dashboard/Overview";
 import Orders from "./pages/dashboard/Orders";
 import Customers from "./pages/dashboard/Customers";
@@ -34,6 +35,7 @@ function App() {
           <Route path="insights" element={<Insights />} />
           <Route path="marketing" element={<Marketing />} />
           <Route path="marketing-strategy" element={<MarketingStrategy />} />
+          <Route path="content-studio" element={<ContentStudio />} />
           <Route path="instagram" element={<InstagramConnect />} />
           <Route path="reports" element={<Reports />} />
           <Route path="weekly-planner" element={<WeeklyPlanner />} />

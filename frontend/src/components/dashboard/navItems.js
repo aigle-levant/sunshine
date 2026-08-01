@@ -18,6 +18,7 @@ import {
   Sparkles,
   Users,
   Wallet,
+  Wand,
 } from "lucide-react";
 
 export const DASHBOARD_ROOT = "/dashboard";
@@ -60,6 +61,12 @@ export const NAV_ITEMS = [
     label: "Strategy",
     to: `${DASHBOARD_ROOT}/marketing-strategy`,
     icon: Sparkles,
+  },
+  {
+    id: "content-studio",
+    label: "Content Studio",
+    to: `${DASHBOARD_ROOT}/content-studio`,
+    icon: Wand,
   },
   {
     id: "reports",
