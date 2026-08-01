@@ -11,6 +11,7 @@
 import {
   BarChart3,
   CalendarDays,
+  Link2,
   LayoutDashboard,
   Lightbulb,
   Megaphone,
@@ -57,8 +58,14 @@ export const NAV_ITEMS = [
     icon: Megaphone,
   },
   {
+    id: "brand-integration",
+    label: "Brand Integration",
+    to: `${DASHBOARD_ROOT}/brand-integration`,
+    icon: Link2,
+  },
+  {
     id: "marketing-strategy",
-    label: "Strategy",
+    label: "Marketing Strategy",
     to: `${DASHBOARD_ROOT}/marketing-strategy`,
     icon: Sparkles,
   },

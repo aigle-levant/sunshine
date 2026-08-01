@@ -232,7 +232,11 @@ export function normaliseRow(row, weekStart) {
 }
 
 function normalisePlatform(value) {
-  return /whats\s*app/i.test(String(value ?? "")) ? "WhatsApp" : "Instagram";
+  const text = String(value ?? "");
+
+  if (/whats\s*app/i.test(text)) return "WhatsApp";
+
+  return "Instagram";
 }
 
 // The generator returns one post per day without a content type, so the week

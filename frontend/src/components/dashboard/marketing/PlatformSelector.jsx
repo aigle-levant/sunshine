@@ -5,7 +5,7 @@
 import useTheme from "../../../hooks/useTheme";
 import PlatformCard from "./PlatformCard";
 
-function PlatformSelector({ selected, onSelectInstagram, onSelectX, onRecommend }) {
+function PlatformSelector({ selected, onSelectInstagram, onRecommend }) {
   const { theme } = useTheme();
 
   const isLight = theme === "light";
@@ -17,23 +17,14 @@ function PlatformSelector({ selected, onSelectInstagram, onSelectX, onRecommend 
         Choose a platform or let AI recommend one based on your business.
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
         <PlatformCard
           emoji="📸"
           title="Instagram"
-          features={["Generate Reels", "Posts", "Stories"]}
+          features={["Reels", "Posts", "Stories"]}
           ctaLabel="Select"
           selected={selected === "instagram"}
           onSelect={onSelectInstagram}
-        />
-
-        <PlatformCard
-          emoji="𝕏"
-          title="X (Twitter)"
-          features={["Short updates", "Trending conversations"]}
-          ctaLabel="Select"
-          selected={selected === "x"}
-          onSelect={onSelectX}
         />
 
         <PlatformCard

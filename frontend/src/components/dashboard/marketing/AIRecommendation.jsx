@@ -1,8 +1,8 @@
 // src/components/dashboard/marketing/AIRecommendation.jsx
 //
 // Shown after "Let AI Decide" calls the backend's platform-recommendation
-// endpoint. Only Instagram has a working connect flow today, so that's the
-// only platform offered a direct "Use" action.
+// endpoint. Claude recommends Instagram, and this offers a direct "Use"
+// action for it.
 
 import { Sparkles } from "lucide-react";
 
@@ -11,10 +11,6 @@ import useTheme from "../../../hooks/useTheme";
 function AIRecommendation({ recommendation, onUseInstagram, onChooseAnother }) {
   const { theme } = useTheme();
   const isLight = theme === "light";
-
-  const isInstagram = String(recommendation?.recommendedPlatform)
-    .toLowerCase()
-    .includes("instagram");
 
   return (
     <div>
@@ -32,15 +28,13 @@ function AIRecommendation({ recommendation, onUseInstagram, onChooseAnother }) {
       </p>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        {isInstagram && (
-          <button
-            type="button"
-            onClick={onUseInstagram}
-            className="rounded-lg bg-[#D77A61] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#C96B53]"
-          >
-            Use Instagram
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onUseInstagram}
+          className="rounded-lg bg-[#D77A61] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#C96B53]"
+        >
+          Use Instagram
+        </button>
 
         <button
           type="button"

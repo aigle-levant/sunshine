@@ -6,10 +6,10 @@
 // without the user pressing Send.
 
 import { useMemo } from "react";
-import { Megaphone } from "lucide-react";
+import { Link2, Megaphone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import EmptyState from "./EmptyState";
-import MarketingOnboarding from "./marketing/MarketingOnboarding";
 import Panel from "./Panel";
 import SuggestedCampaign from "./SuggestedCampaign";
 import { DASHBOARD_ROOT } from "./navItems";
@@ -88,6 +88,8 @@ function MarketingPreview({
   delay = 0,
   onboardingWhenEmpty = false,
 }) {
+  const navigate = useNavigate();
+
   const campaigns = useMemo(
     () => buildCampaigns({ orders, customers }),
     [orders, customers],
@@ -123,7 +125,14 @@ function MarketingPreview({
           ))}
         </ul>
       ) : onboardingWhenEmpty ? (
-        <MarketingOnboarding />
+        <EmptyState
+          icon={Link2}
+          compact
+          title="Connect a platform to get started"
+          description="Head to Brand Integration to connect Instagram and let VoiceKart AI learn your brand."
+          actionLabel="Go to Brand Integration"
+          onAction={() => navigate(`${DASHBOARD_ROOT}/brand-integration`)}
+        />
       ) : (
         <EmptyState
           icon={Megaphone}

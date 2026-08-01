@@ -46,7 +46,7 @@ export async function getLatestBrandContext(userId) {
   return data?.brand_context ?? null;
 }
 
-export async function generateWeeklyPlan(businessSummary, brandContext) {
+export async function generateWeeklyPlan(businessSummary, brandContext, platform = "Instagram") {
   let response;
 
   try {
@@ -56,6 +56,7 @@ export async function generateWeeklyPlan(businessSummary, brandContext) {
       body: JSON.stringify({
         businessSummary,
         brandContext: brandContext ? JSON.stringify(brandContext) : "",
+        platform,
       }),
     });
   } catch {
@@ -93,6 +94,34 @@ export async function recommendPlatform(businessSummary) {
   return { recommendedPlatform: payload.recommendedPlatform, reason: payload.reason };
 }
 
+/**
+ * Trims the raw Apify Instagram profile (images, thumbnails, full post
+ * history, external URLs, ...) down to the handful of fields the strategy
+ * prompt actually reads, so the request stays well under Express's body
+ * size limit.
+ */
+function buildPlatformAnalysis(profile, brandContext) {
+  if (!profile && !brandContext) return null;
+
+  return {
+    bio: profile?.biography || profile?.bio,
+    followers: profile?.followers,
+    businessCategory: profile?.businessCategory,
+    username: profile?.username,
+    displayName: profile?.displayName,
+    verified: profile?.verified,
+    brandTone: brandContext?.brandTone,
+    brandDNA: brandContext?.brandDNA,
+    audience: brandContext?.audience,
+    contentPillars: brandContext?.contentPillars,
+    postingFrequency: brandContext?.postingFrequency,
+    captions: profile?.latestPosts
+      ?.slice(0, 5)
+      .map((post) => post.caption)
+      .filter(Boolean),
+  };
+}
+
 export async function generateMarketingStrategy({
   businessSummary,
   brandContext,
@@ -101,22 +130,31 @@ export async function generateMarketingStrategy({
   campaignPreferences,
   postingFrequency,
   contentGoal,
+  platform = "Instagram",
 }) {
   let response;
+
+  const trimmedPlatformAnalysis = buildPlatformAnalysis(platformAnalysis, brandContext);
+
+  const requestBody = {
+    businessSummary,
+    brandContext: brandContext ? JSON.stringify(brandContext) : "",
+    platformAnalysis: trimmedPlatformAnalysis ? JSON.stringify(trimmedPlatformAnalysis) : "",
+    ownerContext,
+    campaignPreferences,
+    postingFrequency,
+    contentGoal,
+    platform,
+  };
+
+  console.log("Generate Strategy Payload");
+  console.log(JSON.stringify(requestBody, null, 2));
 
   try {
     response = await fetch(`${API_URL}/api/planner/generate-strategy`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        businessSummary,
-        brandContext: brandContext ? JSON.stringify(brandContext) : "",
-        platformAnalysis: platformAnalysis ? JSON.stringify(platformAnalysis) : "",
-        ownerContext,
-        campaignPreferences,
-        postingFrequency,
-        contentGoal,
-      }),
+      body: JSON.stringify(requestBody),
     });
   } catch {
     throw new Error("Couldn't reach VoiceKart AI. Check that the backend is running.");

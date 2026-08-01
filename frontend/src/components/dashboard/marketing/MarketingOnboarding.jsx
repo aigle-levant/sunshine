@@ -19,13 +19,11 @@ import PlatformSelector from "./PlatformSelector";
 import InstagramConnect from "./InstagramConnect";
 import BrandSummaryCard from "./BrandSummaryCard";
 import AIRecommendation from "./AIRecommendation";
-import XConnect from "./XConnect";
 
 const STEP = {
   SELECT: "select",
   INSTAGRAM_CONNECT: "instagram-connect",
   INSTAGRAM_CONNECTED: "instagram-connected",
-  X_CONNECT: "x-connect",
   AI_RECOMMEND: "ai-recommend",
 };
 
@@ -77,7 +75,9 @@ function MarketingOnboarding() {
   // Brand analysis is already in hand — hand off to Marketing Strategy
   // instead of calling Claude again for anything.
   const handleContinueToStrategy = () => {
-    navigate("/dashboard/marketing-strategy", { state: { profile, brandContext } });
+    navigate("/dashboard/marketing-strategy", {
+      state: { profile, brandContext, platform: "Instagram" },
+    });
   };
 
   return (
@@ -96,10 +96,6 @@ function MarketingOnboarding() {
             setSelectedPlatform("instagram");
             setStep(STEP.INSTAGRAM_CONNECT);
           }}
-          onSelectX={() => {
-            setSelectedPlatform("x");
-            setStep(STEP.X_CONNECT);
-          }}
           onRecommend={handleRecommend}
         />
       )}
@@ -116,13 +112,12 @@ function MarketingOnboarding() {
 
       {step === STEP.INSTAGRAM_CONNECTED && (
         <BrandSummaryCard
+          platform="Instagram"
           profile={profile}
           brandContext={brandContext}
           onContinue={handleContinueToStrategy}
         />
       )}
-
-      {step === STEP.X_CONNECT && <XConnect onBack={resetToSelect} />}
 
       {step === STEP.AI_RECOMMEND && (
         <AIRecommendation

@@ -5,7 +5,11 @@ const router = express.Router();
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-function buildPrompt(businessSummary, brandContext) {
+function buildPrompt(businessSummary, brandContext, platform = "Instagram") {
+  const contentTypeGuidance = "Reel, Carousel, Story or Photo";
+
+  const toneGuidance = "Maintain the same writing tone as the existing Instagram profile.";
+
   return `You are an expert social media marketing strategist.
 
 Business Summary
@@ -14,21 +18,23 @@ ${businessSummary || "No business summary available."}
 Brand Context
 ${brandContext || "No brand context available."}
 
-Generate a complete marketing calendar for the next 7 days.
+Generate a complete ${platform} marketing calendar for the next 7 days.
 
 For each day generate
 - day
 - platform
 - campaign title
 - campaign objective
-- instagram caption
+- ${platform.toLowerCase()} caption
 - whatsapp message
 - hashtags
 - best posting time
 - image prompt
 - suggested AI design tool
 
-Maintain the same writing tone as the existing Instagram profile.
+Each day's content type should be one of: ${contentTypeGuidance}.
+
+${toneGuidance}
 
 Alternate between promotional, educational, engagement and storytelling posts.
 
@@ -39,7 +45,7 @@ Schema
   "week": [
     {
       "day": "",
-      "platform": "Instagram",
+      "platform": "${platform}",
       "title": "",
       "objective": "",
       "caption": "",
@@ -55,7 +61,7 @@ Schema
 
 router.post("/generate", async (req, res) => {
   try {
-    const { businessSummary, brandContext } = req.body;
+    const { businessSummary, brandContext, platform } = req.body;
 
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5",
@@ -64,7 +70,7 @@ router.post("/generate", async (req, res) => {
       messages: [
         {
           role: "user",
-          content: buildPrompt(businessSummary, brandContext),
+          content: buildPrompt(businessSummary, brandContext, platform),
         },
       ],
     });
@@ -104,6 +110,8 @@ router.post("/recommend-platform", async (req, res) => {
 
 Business Summary
 ${businessSummary || "No business summary available."}
+
+Recommend Instagram if it's suitable for this business.
 
 Return ONLY JSON.
 
@@ -145,6 +153,13 @@ Schema
 
 router.post("/generate-strategy", async (req, res) => {
   try {
+    console.log("\n==============================");
+    console.log("🚀 GENERATE STRATEGY REQUEST");
+    console.log("==============================");
+
+    console.log("Request Body:");
+    console.log(JSON.stringify(req.body, null, 2));
+
     const {
       businessSummary,
       brandContext,
@@ -153,87 +168,24 @@ router.post("/generate-strategy", async (req, res) => {
       campaignPreferences,
       postingFrequency,
       contentGoal,
+      platform,
     } = req.body;
 
-    const prompt = `You are an expert marketing strategist.
-
-Using the following information
-
-Business Summary
-${businessSummary || "No business summary available."}
-
-Brand Context
-${brandContext || "No brand context available."}
-
-Instagram Analysis
-${platformAnalysis || "No platform analysis available."}
-
-Owner Context
-${ownerContext || "None provided — use your best judgement."}
-
-Campaign Preferences
-${Array.isArray(campaignPreferences) && campaignPreferences.length ? campaignPreferences.join(", ") : "AI Recommended"}
-
-Posting Frequency
-${postingFrequency || "Not specified"}
-
-Content Goal
-${contentGoal || "Not specified"}
-
-Create a marketing strategy.
-
-Return ONLY JSON.
-
-Schema
-{
-  "brandSummary": "",
-  "marketingObjective": "",
-  "recommendedPlatforms": ["Instagram", "WhatsApp"],
-  "contentMix": [
-    { "type": "Educational", "percentage": 30 }
-  ],
-  "postingSchedule": "",
-  "weeklyTheme": "",
-  "keyMessages": [],
-  "ctaStyle": "",
-  "recommendedHashtags": [],
-  "imageStyle": "",
-  "nextStep": "Generate Weekly Planner"
-}`;
-
-    const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 1200,
-      temperature: 0.5,
-      messages: [{ role: "user", content: prompt }],
+    console.log("\nParsed Values:");
+    console.log({
+      businessSummary,
+      brandContext,
+      platformAnalysis,
+      ownerContext,
+      campaignPreferences,
+      postingFrequency,
+      contentGoal,
+      platform,
     });
 
-    let content = response.content[0].text.trim();
-    content = content
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/```$/, "")
-      .trim();
+    const resolvedPlatform = "Instagram";
 
-    const json = JSON.parse(content);
-
-    res.json({ success: true, strategy: json });
-  } catch (err) {
-    console.error("Planner generate-strategy error:", err);
-    res.status(500).json({
-      success: false,
-      error: err.message || "Failed to generate marketing strategy",
-    });
-  }
-});
-
-router.post("/regenerate-day", async (req, res) => {
-  try {
-    const { businessSummary, brandContext, day } = req.body;
-
-    if (!day) {
-      return res.status(400).json({ success: false, error: "day is required" });
-    }
+    const strategyGuidance = "Generate an Instagram-focused strategy: visual storytelling, Reels, Carousels and Stories.";
 
     const prompt = `You are an expert social media marketing strategist.
 
@@ -243,14 +195,134 @@ ${businessSummary || "No business summary available."}
 Brand Context
 ${brandContext || "No brand context available."}
 
-Generate ONE new marketing post idea for ${day}, different from before.
+Platform Analysis
+${platformAnalysis || "No platform analysis available."}
+
+Owner Context
+${ownerContext || "No additional context provided."}
+
+Campaign Preferences
+${Array.isArray(campaignPreferences) && campaignPreferences.length ? campaignPreferences.join(", ") : "No specific preferences."}
+
+Posting Frequency
+${postingFrequency || "Not specified."}
+
+Content Goal
+${contentGoal || "Not specified."}
+
+Platform
+${resolvedPlatform}
+
+${strategyGuidance}
+
+Return ONLY JSON.
+
+Schema
+{
+  "marketingObjective": "",
+  "weeklyTheme": "",
+  "recommendedPlatforms": ["${resolvedPlatform}"],
+  "contentMix": [{ "type": "", "percentage": 0 }],
+  "keyMessages": [],
+  "ctaStyle": "",
+  "imageStyle": ""
+}`;
+
+    console.log("\n========== PROMPT ==========");
+    console.log(prompt);
+    console.log("============================\n");
+
+    console.log("🤖 Calling Claude...");
+
+    const response = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 1200,
+      temperature: 0.5,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    console.log("✅ Claude responded");
+
+    console.log("\nRAW RESPONSE:");
+    console.log(JSON.stringify(response, null, 2));
+
+    if (!response.content?.length) {
+      throw new Error("Claude returned empty content");
+    }
+
+    let content = response.content[0].text.trim();
+
+    console.log("\nRAW TEXT:");
+    console.log(content);
+
+    content = content
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```$/, "")
+      .trim();
+
+    console.log("\nCLEANED JSON:");
+    console.log(content);
+
+    const json = JSON.parse(content);
+
+    console.log("\nPARSED JSON:");
+    console.log(JSON.stringify(json, null, 2));
+
+    res.json({
+      success: true,
+      strategy: json,
+    });
+
+  } catch (err) {
+
+    console.error("\n==============================");
+    console.error("❌ GENERATE STRATEGY FAILED");
+    console.error("==============================");
+
+    console.error("Message:");
+    console.error(err.message);
+
+    console.error("\nStack:");
+    console.error(err.stack);
+
+    console.error("\nFull Error:");
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      stack: err.stack,
+    });
+  }
+});
+
+router.post("/regenerate-day", async (req, res) => {
+  try {
+    const { businessSummary, brandContext, day, platform } = req.body;
+
+    if (!day) {
+      return res.status(400).json({ success: false, error: "day is required" });
+    }
+
+    const resolvedPlatform = "Instagram";
+
+    const prompt = `You are an expert social media marketing strategist.
+
+Business Summary
+${businessSummary || "No business summary available."}
+
+Brand Context
+${brandContext || "No brand context available."}
+
+Generate ONE new ${resolvedPlatform} marketing post idea for ${day}, different from before.
 
 Return ONLY JSON.
 
 Schema
 {
   "day": "${day}",
-  "platform": "Instagram",
+  "platform": "${resolvedPlatform}",
   "title": "",
   "objective": "",
   "caption": "",

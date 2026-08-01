@@ -1,7 +1,8 @@
 // src/components/dashboard/marketing/BrandSummaryCard.jsx
 //
-// Shown once Instagram analysis succeeds — a snapshot of the profile and the
+// Shown once platform analysis succeeds — a snapshot of the profile and the
 // brand context Claude derived from it, before moving on to strategy.
+// Instagram shows Followers/Bio/Content Pillars/Tone.
 
 import { CheckCircle2 } from "lucide-react";
 
@@ -18,7 +19,7 @@ function Stat({ label, value, isLight }) {
   );
 }
 
-function BrandSummaryCard({ profile, brandContext, onContinue }) {
+function BrandSummaryCard({ platform = "Instagram", profile, brandContext, onContinue }) {
   const { theme } = useTheme();
   const isLight = theme === "light";
 

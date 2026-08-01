@@ -1,17 +1,21 @@
 // src/pages/dashboard/MarketingStrategy.jsx
 //
-// Sits between Instagram/X analysis and the Weekly Planner. The owner reviews
-// what the AI already understood about their brand (from router state — no
-// Instagram scrape or brand-DNA call happens here), adds optional context and
-// preferences, then generates a marketing strategy that's handed off to the
-// planner. This page never schedules or builds a calendar itself.
+// Sits between Brand Integration and the Weekly Planner. The owner reviews
+// what the AI already understood about their brand — handed over by router
+// state when arriving straight from Brand Integration, or read back from the
+// saved analysis on a direct visit — adds optional context and preferences,
+// then generates a marketing strategy that's handed off to the planner. This
+// page never schedules or builds a calendar itself, and never re-runs
+// Instagram analysis or brand-DNA generation.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Sparkles } from "lucide-react";
 
 import useTheme from "../../hooks/useTheme";
+import demoUser from "../../constants/demoUser";
 import { buildBusinessSummary, generateMarketingStrategy } from "../../services/planner";
+import { getLatestInstagramAnalysis } from "../../services/instagram";
 
 import PlatformSummaryCard from "../../components/dashboard/strategy/PlatformSummaryCard";
 import BrandDNAEditor from "../../components/dashboard/strategy/BrandDNAEditor";
@@ -37,13 +41,45 @@ function MarketingStrategy() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // This page only ever reads the profile/brandContext handed to it by the
-  // previous step — it never re-runs Instagram analysis or brand-DNA
-  // generation itself.
-  const profile = location.state?.profile ?? null;
-  const brandContext = location.state?.brandContext ?? null;
+  // Handed over by Brand Integration on navigation; absent on a direct visit,
+  // in which case the saved analysis is read back below.
+  const [profile, setProfile] = useState(location.state?.profile ?? null);
+  const [brandContext, setBrandContext] = useState(location.state?.brandContext ?? null);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(!location.state?.brandContext);
+  const platform = "Instagram";
+
+  useEffect(() => {
+    if (location.state?.brandContext) return;
+
+    let cancelled = false;
+
+    getLatestInstagramAnalysis(demoUser.id)
+      .then((result) => {
+        if (cancelled || !result) return;
+
+        setProfile(result.profile);
+        setBrandContext(result.brandContext);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingAnalysis(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // Only ever runs for the direct-visit case, once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [brandDna, setBrandDna] = useState(brandDnaFromContext(brandContext));
+
+  // Fills in once the direct-visit fetch above resolves; a no-op when brand
+  // context already arrived via router state.
+  useEffect(() => {
+    if (brandContext) setBrandDna(brandDnaFromContext(brandContext));
+  }, [brandContext]);
+
   const [businessContext, setBusinessContext] = useState("");
   const [selectedPreferences, setSelectedPreferences] = useState([]);
   const [postingFrequency, setPostingFrequency] = useState("3x per week");
@@ -55,6 +91,21 @@ function MarketingStrategy() {
 
   const textColor = isLight ? "text-[#223843]" : "text-[#EFF1F3]";
 
+  if (loadingAnalysis) {
+    return (
+      <div className={textColor}>
+        <div
+          className={`flex flex-col items-center gap-3 rounded-2xl border border-dashed p-12 text-center ${
+            isLight ? "border-[#223843]/20" : "border-white/20"
+          }`}
+        >
+          <Sparkles size={22} className="animate-pulse text-[#D77A61]" />
+          <p className="text-sm font-medium">Checking for a saved brand analysis...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!brandContext) {
     return (
       <div className={textColor}>
@@ -63,17 +114,17 @@ function MarketingStrategy() {
             isLight ? "border-[#223843]/20" : "border-white/20"
           }`}
         >
-          <p className="text-lg font-semibold">No brand analysis found.</p>
+          <p className="text-lg font-semibold">No Brand Analysis found.</p>
           <p className={`mt-2 text-sm ${isLight ? "text-[#223843]/60" : "text-[#EFF1F3]/60"}`}>
-            Please analyse an Instagram account first.
+            Connect and analyse a platform in Brand Integration first.
           </p>
 
           <button
             type="button"
-            onClick={() => navigate("/dashboard/marketing")}
+            onClick={() => navigate("/dashboard/brand-integration")}
             className="mt-6 rounded-lg bg-[#D77A61] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#C96B53]"
           >
-            Go to Marketing
+            Go to Brand Integration
           </button>
         </div>
       </div>
@@ -86,7 +137,7 @@ function MarketingStrategy() {
     );
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (contextOverride) => {
     setError("");
     setGenerating(true);
 
@@ -97,10 +148,11 @@ function MarketingStrategy() {
         businessSummary,
         brandContext: { ...brandContext, brandDNA: brandDna },
         platformAnalysis: profile,
-        ownerContext: businessContext,
+        ownerContext: contextOverride ?? businessContext,
         campaignPreferences: selectedPreferences,
         postingFrequency,
         contentGoal,
+        platform,
       });
 
       setStrategy(result);
@@ -112,7 +164,7 @@ function MarketingStrategy() {
   };
 
   const handleContinue = () => {
-    navigate("/dashboard/weekly-planner", { state: { strategy, brandContext, profile } });
+    navigate("/dashboard/weekly-planner", { state: { strategy, brandContext, profile, platform } });
   };
 
   const handleCreateContent = () => {
@@ -160,7 +212,7 @@ function MarketingStrategy() {
         <div className="flex flex-col gap-6">
           <PlatformSummaryCard
             emoji="📸"
-            name="Instagram"
+            name={platform}
             profile={profile}
             brandContext={brandContext}
           />
@@ -170,7 +222,12 @@ function MarketingStrategy() {
           <BusinessContextInput
             value={businessContext}
             onChange={setBusinessContext}
-            onAiHandle={() => setBusinessContext("")}
+            onGenerateWithContext={() => handleGenerate()}
+            onGenerateAuto={() => {
+              setBusinessContext("");
+              handleGenerate("");
+            }}
+            generating={generating}
           />
 
           <CampaignPreferenceSelector selected={selectedPreferences} onToggle={togglePreference} />
@@ -185,7 +242,7 @@ function MarketingStrategy() {
           />
 
           <StrategyPreview
-            platform="Instagram"
+            platform={platform}
             brandTone={brandContext?.brandTone}
             audience={brandContext?.audience}
             businessContext={businessContext}
@@ -205,15 +262,6 @@ function MarketingStrategy() {
             </div>
           ) : (
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={handleGenerate}
-                className="flex items-center justify-center gap-2 rounded-lg bg-[#D77A61] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#C96B53]"
-              >
-                <Sparkles size={18} />
-                Generate Marketing Strategy
-              </button>
-
               <button
                 type="button"
                 onClick={() => navigate(-1)}

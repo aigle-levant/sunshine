@@ -13,8 +13,8 @@
 // state, in which case that strategy and its brand context are what the week is
 // generated from.
 
-import { useCallback, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, Plus, Sparkles } from "lucide-react";
 
 import useTheme from "../../hooks/useTheme";
@@ -28,6 +28,7 @@ import {
   startOfWeek,
   toKey,
 } from "../../components/planner/plannerModel";
+import { getPlannerWeeks } from "../../lib/storage.js";
 import demoUser from "../../constants/demoUser";
 import {
   buildBusinessSummary,
@@ -40,6 +41,7 @@ import {
 function WeeklyPlanner() {
   const { theme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [editingId, setEditingId] = useState(null);
@@ -53,8 +55,23 @@ function WeeklyPlanner() {
   // Handed over by Marketing Strategy on navigation, absent on a direct visit.
   const incomingStrategy = location.state?.strategy ?? null;
   const incomingBrandContext = location.state?.brandContext ?? null;
+  const incomingPlatform = "Instagram";
 
   const isThisWeek = toKey(weekStart) === toKey(startOfWeek(new Date()));
+
+  // Marketing Strategy is assumed to exist by the time this page is used for
+  // real. A direct visit with nothing generated yet and no saved weeks means
+  // there's nothing to show or build from, so it sends the owner back to
+  // create one — an existing plan or an in-flight generation is left alone.
+  useEffect(() => {
+    if (incomingStrategy) return;
+    if (rows.length) return;
+    if (Object.keys(getPlannerWeeks()).length) return;
+
+    navigate("/dashboard/marketing-strategy", { replace: true });
+    // Only ever relevant on first mount for a direct, empty visit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const goToWeek = useCallback((next) => {
     // Nothing is left half-edited across a week change: the open editor belongs
@@ -118,6 +135,7 @@ function WeeklyPlanner() {
       const week = await generateWeeklyPlan(
         businessSummary,
         incomingStrategy ? { ...brandContext, strategy: incomingStrategy } : brandContext,
+        incomingPlatform,
       );
 
       replaceAll(rowsFromGeneratedWeek(week, weekStart));
@@ -130,7 +148,7 @@ function WeeklyPlanner() {
     } finally {
       setIsGenerating(false);
     }
-  }, [incomingBrandContext, incomingStrategy, replaceAll, weekStart]);
+  }, [incomingBrandContext, incomingPlatform, incomingStrategy, replaceAll, weekStart]);
 
   return (
     <div className="flex flex-col gap-6">
