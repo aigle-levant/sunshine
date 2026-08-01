@@ -61,6 +61,23 @@ Return JSON in exactly this format:
   "insights": []
 }
 
+LANGUAGE
+
+The transcript arrives untranslated, exactly as it was spoken or typed.
+Understand Tamil, English and Tanglish equally well.
+
+The JSON values you return must be in English, so the app can label them:
+- Customer names: romanise them. பிரியா → "Priya". செல்வி → "Selvi".
+- Products and services: use the common English or romanised name.
+  முருக்கு → "Murukku". சேலை → "Saree". பலகாரம் → "Snacks".
+- Quantities, prices and amounts: always plain digits, never words.
+  ரூ.250 → 250. "இருநூறு" → 200.
+- Dates: English. "Friday", "Tomorrow", "2026-08-05".
+- summary: write it in English.
+
+Do NOT translate the transcript itself back to the user, and do NOT add a
+translation field. Only the extracted values are normalised to English.
+
 Extraction Rules
 
 CUSTOMERS
@@ -141,6 +158,43 @@ Output:
   ],
   "insights": [
     "Advance payment received for a pending delivery."
+  ]
+}
+
+Input (Tamil):
+"பிரியா 5 முருக்கு வாங்கினாங்க. 250 ரூபாய் கொடுத்தாங்க."
+
+Output:
+
+{
+  "summary": "Priya bought 5 murukku and paid ₹250 in full.",
+  "customers": [
+    {
+      "name": "Priya",
+      "phone": null
+    }
+  ],
+  "orders": [
+    {
+      "customer": "Priya",
+      "item": "Murukku",
+      "quantity": 5,
+      "price": null,
+      "delivery_date": null,
+      "status": "Completed"
+    }
+  ],
+  "payments": [
+    {
+      "customer": "Priya",
+      "amount": 250,
+      "payment_type": "Full",
+      "status": "Paid"
+    }
+  ],
+  "tasks": [],
+  "insights": [
+    "Murukku sold and fully paid for on the spot."
   ]
 }
 `;
