@@ -1,10 +1,10 @@
-# Sunshine - AI-Powered Business Assistant
+# VoiceKart AI - AI-Powered Business Assistant
 
 A modern, multilingual voice-enabled business assistant application that intelligently processes natural language input to extract and manage business data (customers, orders, payments, expenses) and generate marketing content. Built with React 19, Express.js, and Claude AI.
 
 ## 🎯 Overview
 
-Sunshine helps small business owners and entrepreneurs manage their operations through:
+VoiceKart AI helps small business owners and entrepreneurs manage their operations through:
 - **Voice-First Interface**: Speak or type in multiple languages to instantly extract business data
 - **AI-Powered Extraction**: Uses Claude AI to intelligently parse unstructured business information
 - **Comprehensive Dashboard**: Manage orders, customers, payments, and view detailed analytics
@@ -64,7 +64,6 @@ Comprehensive management interface with:
 - **Node.js** - JavaScript runtime
 - **Express 5.2.1** - Lightweight, flexible HTTP server framework
 - **Claude AI SDK 0.115.0** - Integration with Anthropic's Claude AI
-- **Supabase JS 2.38.4** - Database and auth client
 - **Apify Client 2.24.0** - Web scraping for Instagram data collection
 - **CORS 2.8.6** - Cross-origin resource sharing middleware
 - **Dotenv 17.4.2** - Environment variable management
@@ -74,7 +73,7 @@ Comprehensive management interface with:
 ## 📁 Project Structure
 
 ```
-sunshine/
+voicekart-ai/
 ├── frontend/                          # React application
 │   ├── src/
 │   │   ├── pages/                    # Route pages
@@ -159,8 +158,8 @@ sunshine/
 #### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/aigle-levant/sunshine.git
-cd sunshine
+git clone https://github.com/aigle-levant/voicekart-ai.git
+cd voicekart-ai
 ```
 
 #### 2. Set Up Backend
@@ -230,7 +229,7 @@ Server status check
 **Response:**
 ```json
 {
-  "message": "Sunshine API Server"
+  "message": "VoiceKart AI API Server"
 }
 ```
 
@@ -398,7 +397,7 @@ Generate weekly content plan using Claude AI
 
 ## 🌍 Language Support
 
-Sunshine intelligently handles multiple languages:
+VoiceKart AI intelligently handles multiple languages:
 
 | Language | Support Level | Notes |
 |----------|--------------|-------|
@@ -455,7 +454,7 @@ English: "Customer John Smith ordered 5 iPhone phones. Total 80000 rupees."
 ### Frontend Build
 
 ```bash
-cd frontend
+cd voicekart-ai/frontend
 npm run build
 ```
 
@@ -577,7 +576,7 @@ This project is licensed under the **ISC License** - see the [LICENSE](LICENSE) 
 
 For questions, issues, or suggestions:
 
-- **GitHub Issues**: [Open an issue](https://github.com/aigle-levant/sunshine/issues)
+- **GitHub Issues**: [Open an issue](https://github.com/aigle-levant/voicekart-ai/issues)
 - **Email**: aiglelevant@gmail.com
 
 ---
@@ -594,4 +593,4 @@ For questions, issues, or suggestions:
 
 **Happy selling! 🌞**
 
-For the latest features and updates, check out our [GitHub repository](https://github.com/aigle-levant/sunshine).
+For the latest features and updates, check out our [GitHub repository](https://github.com/aigle-levant/voicekart-ai).
