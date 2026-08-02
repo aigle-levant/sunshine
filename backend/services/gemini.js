@@ -3,6 +3,11 @@
 // Gemini, used for one thing only: turning a text prompt into an image. All text
 // generation in this project stays with Claude (see claude.js) — captions, weekly
 // plans and brand analysis are unchanged.
+//
+// Which image models a key can actually use varies by project and billing tier,
+// and hardcoded model names go stale (two of the four this file used to list no
+// longer exist). So the model isn't guessed: the account is asked what it has,
+// and each candidate is tried until one returns pixels.
 
 import { GoogleGenAI, Modality } from "@google/genai";
 import dotenv from "dotenv";
@@ -16,31 +21,10 @@ dotenv.config({
     path: path.join(path.dirname(fileURLToPath(import.meta.url)), "..", ".env"),
 });
 
-/**
- * Tried in order until one answers. Which image models a key can reach depends
- * on the account and the tier, so rather than failing on a model this key isn't
- * entitled to, fall through to the next candidate.
- *
- * Gemini models return images from generateContent; `imagen-*` models use a
- * different SDK method, handled below. GEMINI_IMAGE_MODEL pins one explicitly
- * and is always tried first.
- */
-const MODEL_CANDIDATES = [
-    "gemini-2.5-flash-image",
-    "gemini-2.0-flash-preview-image-generation",
-    "imagen-4.0-generate-001",
-    "imagen-3.0-generate-002",
-];
-
-function modelsToTry(preferred) {
-    const configured = preferred || process.env.GEMINI_IMAGE_MODEL;
-
-    if (!configured) return MODEL_CANDIDATES;
-
-    return [configured, ...MODEL_CANDIDATES.filter((model) => model !== configured)];
-}
-
 let client = null;
+
+/** Model discovery is one network call; hold onto the answer for the process. */
+let discoveredModels = null;
 
 /**
  * Built on first use rather than at import.
@@ -91,14 +75,20 @@ function apiMessage(error) {
 }
 
 /**
- * True when the failure means "not this model" rather than "not at all".
- * An invalid key, a safety block or an exhausted quota fail the same way on
- * every model, so those stop the loop instead of hammering all four.
+ * True when the failure means "not this model" rather than "not at all", so the
+ * loop should try the next candidate.
+ *
+ * A quota rejection counts. On the free tier these models report
+ * `limit: 0` — an entitlement, not a used-up allowance — and a different model
+ * may still be permitted, so it's worth asking rather than giving up.
+ *
+ * An invalid key or a safety block fails identically on every model, so those
+ * stop the loop instead of hammering all ten.
  */
-function isModelUnavailable(error) {
+function shouldTryNextModel(error) {
     const status = error?.status;
 
-    if (status === 404) return true;
+    if (status === 404 || status === 429) return true;
     if (status !== 400) return false;
 
     const message = apiMessage(error).toLowerCase();
@@ -112,25 +102,58 @@ function isModelUnavailable(error) {
     );
 }
 
-/** What this key can actually reach — used when diagnosing a model failure. */
-export async function listImageModels() {
-    const ai = getClient();
+/**
+ * Cheapest and most widely available first: lite, then flash, then pro, then
+ * ultra. A free or low-tier key is likeliest to be entitled to the small ones.
+ */
+function rank(name) {
+    if (/lite/i.test(name)) return 0;
+    if (/flash/i.test(name)) return 1;
+    if (/ultra/i.test(name)) return 3;
+
+    return 2;
+}
+
+/**
+ * The image-capable models this key can see, in the order worth trying.
+ *
+ * `generateContent` is the current way to get an image out of Gemini. Imagen's
+ * `predict` models are included as a fallback, though the SDK now warns that
+ * `generateImages` is deprecated in favour of generateContent.
+ */
+async function discoverImageModels(ai) {
+    if (discoveredModels) return discoveredModels;
 
     const models = [];
 
     for await (const model of await ai.models.list()) {
+        const name = String(model.name ?? "").replace(/^models\//, "");
+
+        if (!name) continue;
+
+        // Video models also expose predict; match on the visual-image families
+        // rather than on the action alone.
+        if (!/image|imagen|banana/i.test(name)) continue;
+
         const actions = model.supportedActions ?? [];
 
-        if (
-            actions.includes("predict") ||
-            /image/i.test(model.name ?? "") ||
-            /image/i.test(model.displayName ?? "")
-        ) {
-            models.push(model.name);
+        if (actions.includes("generateContent")) {
+            models.push({ name, method: "generateContent" });
+        } else if (actions.includes("predict")) {
+            models.push({ name, method: "predict" });
         }
     }
 
-    return models;
+    discoveredModels = models.sort((a, b) => rank(a.name) - rank(b.name));
+
+    return discoveredModels;
+}
+
+/** Exposed for diagnostics: what this key could use, before anything is tried. */
+export async function listImageModels() {
+    const models = await discoverImageModels(getClient());
+
+    return models.map((model) => `${model.name} (${model.method})`);
 }
 
 /** Gemini's own image output: one part of a generateContent response. */
@@ -184,9 +207,9 @@ async function generateWithImagen(ai, model, prompt) {
 /**
  * Generate an image from a text description.
  *
- * Walks the candidate models until one produces an image. A model this key
- * can't reach is skipped; any other failure (bad key, safety block, quota)
- * stops immediately and is reported as-is.
+ * Works through every image model this key can see until one produces pixels.
+ * A model that's missing or unaffordable is skipped; a bad key or a safety block
+ * stops immediately, since retrying those on another model changes nothing.
  *
  * @param {string} prompt What to draw.
  * @param {{ model?: string }} [options] Pins a model, tried before the rest.
@@ -201,33 +224,63 @@ export async function generateImage(prompt, { model } = {}) {
 
     const ai = getClient();
 
-    const candidates = modelsToTry(model);
+    const pinned = model || process.env.GEMINI_IMAGE_MODEL;
 
-    let lastError = null;
+    const discovered = await discoverImageModels(ai);
+
+    const candidates = pinned
+        ? [
+              {
+                  name: pinned,
+                  method: pinned.startsWith("imagen") ? "predict" : "generateContent",
+              },
+              ...discovered.filter((candidate) => candidate.name !== pinned),
+          ]
+        : discovered;
+
+    if (!candidates.length) {
+        throw new Error(
+            "This API key can't see any image generation models. Check the key's project in Google AI Studio.",
+        );
+    }
+
+    const failures = [];
 
     for (const candidate of candidates) {
         try {
-            const image = candidate.startsWith("imagen")
-                ? await generateWithImagen(ai, candidate, text)
-                : await generateWithGemini(ai, candidate, text);
+            const image =
+                candidate.method === "predict"
+                    ? await generateWithImagen(ai, candidate.name, text)
+                    : await generateWithGemini(ai, candidate.name, text);
 
-            console.log(`Gemini image generated with ${candidate}`);
+            console.log(`Gemini image generated with ${candidate.name}`);
 
             return image;
         } catch (err) {
-            lastError = err;
+            const reason = apiMessage(err);
 
-            if (!isModelUnavailable(err)) {
-                throw new Error(apiMessage(err));
+            failures.push(`${candidate.name}: ${err?.status ?? ""} ${reason.split("\n")[0]}`.trim());
+
+            if (!shouldTryNextModel(err)) {
+                throw new Error(reason);
             }
 
-            console.warn(`Gemini model ${candidate} unavailable, trying the next one`);
+            console.warn(`Gemini model ${candidate.name} unusable — ${reason.split("\n")[0]}`);
         }
     }
 
-    throw new Error(
-        `No image model available for this API key. Last attempt (${
-            candidates[candidates.length - 1]
-        }): ${apiMessage(lastError)}`,
-    );
+    // Every model refused. A quota rejection here means a free-tier limit of 0 —
+    // an entitlement, not an allowance — so lead with that rather than repeating
+    // the same paragraph of Google's prose once per model.
+    const quotaBlocked = failures.filter((line) => /quota|RESOURCE_EXHAUSTED|429/i.test(line));
+
+    if (quotaBlocked.length) {
+        throw new Error(
+            `Image generation isn't enabled for this API key: ${quotaBlocked.length} of ${failures.length} image models report a free-tier quota of 0, and the rest are unavailable to new keys. Enable billing on this key's Google Cloud project, or use a key from a billed project. Tried: ${candidates
+                .map((candidate) => candidate.name)
+                .join(", ")}`,
+        );
+    }
+
+    throw new Error(`No image model produced an image. ${failures.join(" | ")}`);
 }
