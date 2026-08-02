@@ -133,6 +133,32 @@ function GeneratedContentCard({
           </p>
         </Section>
 
+        {/* Below the caption: the image Gemini drew for this post, or the reason
+            there isn't one. Either way the copy above stands on its own. */}
+        {content.image ? (
+          <Section label="Generated image" isLight={isLight}>
+            <img
+              src={content.image}
+              alt={content.title || "Generated image"}
+              className="w-full rounded-xl object-cover"
+            />
+          </Section>
+        ) : (
+          content.imageError && (
+            <Section label="Generated image" isLight={isLight}>
+              <p
+                className={`rounded-xl border border-dashed px-4 py-3.5 text-[13px] leading-6 ${
+                  isLight
+                    ? "border-[#223843]/15 text-[#223843]/55"
+                    : "border-white/15 text-[#EFF1F3]/55"
+                }`}
+              >
+                No image this time — {content.imageError}
+              </p>
+            </Section>
+          )
+        )}
+
         {content.hashtags?.length > 0 && (
           <Section label="Suggested hashtags" isLight={isLight}>
             <ul className="flex flex-wrap gap-2">

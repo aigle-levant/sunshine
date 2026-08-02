@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { anthropic } from "./claude.js";
 import instagramRoutes from "./routes/instagram.js";
 import plannerRoutes from "./routes/planner.js";
+import studioRoutes from "./routes/studio.js";
 
 dotenv.config();
 
@@ -95,6 +96,7 @@ function computeSummary() {
 
 app.use("/api/instagram", instagramRoutes);
 app.use("/api/planner", plannerRoutes);
+app.use("/api/studio", studioRoutes);
 // ---------------------------------------------------------------------------
 // Health Check
 // ---------------------------------------------------------------------------

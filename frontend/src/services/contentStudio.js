@@ -4,8 +4,9 @@
 // services/api.js — the page never fetches directly, so wiring the real backend
 // means editing this file only.
 //
-// Nothing here calls a model yet. Each function is a placeholder that returns
-// the shape the UI expects; every TODO marks exactly where the request goes.
+// Generation is live: it calls the backend, which writes the copy with Claude
+// and draws the image with Gemini. Drafts and history are still placeholders,
+// each with a TODO marking exactly where its request goes.
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -40,9 +41,10 @@ function newId() {
 // Generation
 // ---------------------------------------------------------------------------
 
-// Sample copy per content type. Written as templates so the preview visibly
-// reflects the tone, audience and product the user actually chose — it is not
-// pretending to be model output.
+// Sample copy per content type, used only when the backend can't be reached, so
+// the page still does something with the server stopped. Written as templates so
+// it visibly reflects the tone, audience and product the user actually chose —
+// and it's flagged `isPreview`, so the result card says it isn't model output.
 const SAMPLES = {
   "Instagram Post": {
     title: "{subject}, made for {audience}",
@@ -119,24 +121,8 @@ function fill(text, { subject, audience }) {
     .replaceAll("{audience}", audience || "your customers");
 }
 
-/**
- * Generate marketing copy for the studio form.
- *
- * TODO(backend): POST ENDPOINTS.generate with
- * { contentType, prompt, tone, language, targetAudience, image } — the image as
- * multipart/form-data or a base64 data URL, depending on what the route takes —
- * and return the parsed { title, caption, hashtags, cta } from the response.
- * Follow the error handling in services/planner.js: throw a friendly Error on a
- * failed fetch, and payload.error on a non-2xx.
- */
-export async function generateContent({
-  contentType = "Instagram Post",
-  prompt = "",
-  tone = "Friendly",
-  language = "English",
-  targetAudience = "",
-  image = null,
-} = {}) {
+/** The offline stand-in. Only reached when the backend can't be contacted. */
+async function sampleContent({ contentType, prompt, tone, language, targetAudience, image }) {
   await wait(FAKE_LATENCY);
 
   const sample = SAMPLES[contentType] ?? SAMPLES["Instagram Post"];
@@ -153,11 +139,73 @@ export async function generateContent({
     caption: fill(sample.caption, { subject, audience: targetAudience }),
     hashtags: sample.hashtags,
     cta: sample.cta,
+    image: null,
+    imageError: "The backend isn't running, so no image was generated.",
     hasImage: Boolean(image),
     createdAt: new Date().toISOString(),
-    // Flagged so the result card can say so rather than passing sample copy off
-    // as generated. Remove once the route above is live.
+    // Flagged so the result card says this is sample copy rather than passing it
+    // off as model output.
     isPreview: true,
+  };
+}
+
+/**
+ * Generate marketing copy, and an image to go with it.
+ *
+ * The route writes the copy with Claude and draws the picture with Gemini, and
+ * answers `{ title, caption, hashtags, callToAction, image }` — `image` being a
+ * data URL, or null with `imageError` explaining why there isn't one. The copy
+ * arrives either way, so a Gemini failure never costs the caption.
+ *
+ * TODO(backend): the uploaded image isn't sent yet — the route takes text only.
+ * When it accepts one, post `image` as multipart/form-data or a base64 data URL
+ * so the copy can describe the photo the owner actually has.
+ */
+export async function generateContent({
+  contentType = "Instagram Post",
+  prompt = "",
+  tone = "Friendly",
+  language = "English",
+  targetAudience = "",
+  image = null,
+} = {}) {
+  let response;
+
+  try {
+    response = await fetch(ENDPOINTS.generate, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contentType, prompt, tone, language, targetAudience }),
+    });
+  } catch {
+    // Unreachable backend falls back rather than failing: the studio worked
+    // offline before this route existed and should carry on doing so. A backend
+    // that answers with an error is a different matter — that's surfaced below.
+    return sampleContent({ contentType, prompt, tone, language, targetAudience, image });
+  }
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload.error || "Failed to generate content");
+  }
+
+  return {
+    id: newId(),
+    contentType,
+    tone,
+    language,
+    targetAudience,
+    title: payload.title ?? "",
+    caption: payload.caption ?? "",
+    hashtags: Array.isArray(payload.hashtags) ? payload.hashtags : [],
+    // The API says `callToAction`; the rest of the studio has always called it `cta`.
+    cta: payload.callToAction ?? "",
+    image: payload.image ?? null,
+    imageError: payload.imageError ?? null,
+    hasImage: Boolean(image),
+    createdAt: new Date().toISOString(),
+    isPreview: false,
   };
 }
 
